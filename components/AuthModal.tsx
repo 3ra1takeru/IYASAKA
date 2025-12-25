@@ -29,18 +29,9 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLogin, onLineL
 
   const handleRealLineLoginRedirect = () => {
     // 実際のアプリでは環境変数などからクライアントIDを取得します
-    const LINE_CLIENT_ID = 'YOUR_LINE_CHANNEL_ID'; // ★ここにLINE Developersコンソールで取得したチャネルIDを入力してください
+    const LINE_CLIENT_ID = '2008776261'; // 設定されたチャネルID
     const REDIRECT_URI = window.location.origin; // 現在のドメインをリダイレクト先とする
     const state = Math.random().toString(36).substring(7); // CSRF対策のランダムな文字列
-
-    if (LINE_CLIENT_ID === 'YOUR_LINE_CHANNEL_ID') {
-        // IDが設定されていない場合のフォールバック（デモ動作またはアラート）
-        // ここではユーザー体験のために、デモ用の佐藤さんとして強制ログインさせるか、アラートを出すか選択できます。
-        // 今回は「設定が必要です」と出しつつ、デモユーザー選択へ誘導します。
-        alert('LINE Loginを実行するには、ソースコードの AuthModal.tsx に LINE Channel ID を設定する必要があります。\n\n現在はデモモードとして、ユーザー選択画面を表示します。');
-        setShowDemoUserSelection(true);
-        return;
-    }
 
     // bot_prompt=normal を追加することで、ログイン時に公式アカウントの友だち追加を促します。
     // これにより、予約完了通知やリマインド通知を送る許可を得やすくなります。
@@ -54,7 +45,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLogin, onLineL
     return (
       <Modal isOpen={isOpen} onClose={handleClose} title="デモログイン (LINE連携シミュレーション)">
         <div className="space-y-4">
-          <p className="text-stone-600">LINEログイン後の挙動を確認するため、どのアカウントとしてログインするか選択してください。</p>
+          <p className="text-stone-600">LINEログインがキャンセルされたか、設定に問題がある場合に表示されます。</p>
           {users.filter(u => u.role !== UserRole.ADMIN).map((user) => (
             <button
               key={user.id}
@@ -93,8 +84,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLogin, onLineL
             <span className="font-bold text-lg">LINEでログイン</span>
         </button>
         <p className="text-xs text-center text-stone-400">
-            公式アカウントと連携し、予約完了通知やリマインドを受け取ることができます。<br/>
-            ※ソースコードにClient IDの設定が必要です。
+            公式アカウントと連携し、予約完了通知やリマインドを受け取ることができます。
         </p>
 
         <div className="relative pt-2">
