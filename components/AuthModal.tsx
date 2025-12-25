@@ -1,0 +1,133 @@
+
+import React, { useState, useEffect } from 'react';
+import { User, UserRole } from '../types';
+import Modal from './Modal';
+import { UserCircleIcon, ChatBubbleIcon } from './icons';
+
+interface AuthModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onLogin: (user: User) => void;
+  // onLineLogin is still passed but we might handle the redirect directly here for the real flow
+  onLineLogin: (user: User) => void;
+  users: User[];
+}
+
+const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLogin, onLineLogin, users }) => {
+  const [showDemoUserSelection, setShowDemoUserSelection] = useState(false);
+
+  // Reset internal state when modal is closed/reopened
+  useEffect(() => {
+    if (!isOpen) {
+      setShowDemoUserSelection(false);
+    }
+  }, [isOpen]);
+
+  const handleClose = () => {
+    onClose();
+  };
+
+  const handleRealLineLoginRedirect = () => {
+    // 実際のアプリでは環境変数などからクライアントIDを取得します
+    const LINE_CLIENT_ID = 'YOUR_LINE_CHANNEL_ID'; // ★ここにLINE Developersコンソールで取得したチャネルIDを入力してください
+    const REDIRECT_URI = window.location.origin; // 現在のドメインをリダイレクト先とする
+    const state = Math.random().toString(36).substring(7); // CSRF対策のランダムな文字列
+
+    if (LINE_CLIENT_ID === 'YOUR_LINE_CHANNEL_ID') {
+        // IDが設定されていない場合のフォールバック（デモ動作またはアラート）
+        // ここではユーザー体験のために、デモ用の佐藤さんとして強制ログインさせるか、アラートを出すか選択できます。
+        // 今回は「設定が必要です」と出しつつ、デモユーザー選択へ誘導します。
+        alert('LINE Loginを実行するには、ソースコードの AuthModal.tsx に LINE Channel ID を設定する必要があります。\n\n現在はデモモードとして、ユーザー選択画面を表示します。');
+        setShowDemoUserSelection(true);
+        return;
+    }
+
+    // bot_prompt=normal を追加することで、ログイン時に公式アカウントの友だち追加を促します。
+    // これにより、予約完了通知やリマインド通知を送る許可を得やすくなります。
+    const authUrl = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=${LINE_CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&state=${state}&scope=profile%20openid&bot_prompt=normal`;
+    
+    // リダイレクト実行
+    window.location.href = authUrl;
+  };
+
+  if (showDemoUserSelection) {
+    return (
+      <Modal isOpen={isOpen} onClose={handleClose} title="デモログイン (LINE連携シミュレーション)">
+        <div className="space-y-4">
+          <p className="text-stone-600">LINEログイン後の挙動を確認するため、どのアカウントとしてログインするか選択してください。</p>
+          {users.filter(u => u.role !== UserRole.ADMIN).map((user) => (
+            <button
+              key={user.id}
+              onClick={() => {
+                onLineLogin(user);
+                onClose();
+              }}
+              className="w-full flex items-center text-left p-4 rounded-lg border border-stone-200 hover:bg-stone-100 hover:border-green-500 transition-all duration-200"
+            >
+              <UserCircleIcon className="w-8 h-8 text-green-600 mr-4" />
+              <div>
+                <p className="font-bold text-lg text-stone-800">{user.name}</p>
+                <div className="flex items-center space-x-2">
+                  <p className="text-sm text-stone-500 uppercase">{user.role}</p>
+                  {user.instagramId && <p className="text-xs text-stone-400">@{user.instagramId}</p>}
+                </div>
+              </div>
+            </button>
+          ))}
+          <button onClick={() => setShowDemoUserSelection(false)} className="w-full mt-2 text-center p-2 text-sm text-stone-600 hover:bg-stone-100 rounded-md transition-colors">
+            戻る
+          </button>
+        </div>
+      </Modal>
+    );
+  }
+
+  return (
+    <Modal isOpen={isOpen} onClose={handleClose} title="ログイン">
+      <div className="space-y-4">
+        <button
+            onClick={handleRealLineLoginRedirect}
+            className="w-full flex items-center justify-center p-3 rounded-lg bg-[#06C755] text-white hover:bg-[#05b34c] transition-colors duration-200 shadow-sm"
+          >
+            <ChatBubbleIcon className="w-6 h-6 mr-3"/>
+            <span className="font-bold text-lg">LINEでログイン</span>
+        </button>
+        <p className="text-xs text-center text-stone-400">
+            公式アカウントと連携し、予約完了通知やリマインドを受け取ることができます。<br/>
+            ※ソースコードにClient IDの設定が必要です。
+        </p>
+
+        <div className="relative pt-2">
+          <div className="absolute inset-0 flex items-center pt-2">
+            <div className="w-full border-t border-stone-300"></div>
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="px-2 bg-white text-stone-500">またはデモユーザーでログイン</span>
+          </div>
+        </div>
+        
+        {users.map((user) => (
+          <button
+            key={user.id}
+            onClick={() => {
+              onLogin(user);
+              onClose();
+            }}
+            className="w-full flex items-center text-left p-4 rounded-lg border border-stone-200 hover:bg-stone-100 hover:border-green-500 transition-all duration-200"
+          >
+            <UserCircleIcon className="w-8 h-8 text-green-600 mr-4" />
+            <div>
+              <p className="font-bold text-lg text-stone-800">{user.name}</p>
+              <div className="flex items-center space-x-2">
+                <p className="text-sm text-stone-500 uppercase">{user.role}</p>
+                {user.instagramId && <p className="text-xs text-stone-400">@{user.instagramId}</p>}
+              </div>
+            </div>
+          </button>
+        ))}
+      </div>
+    </Modal>
+  );
+};
+
+export default AuthModal;

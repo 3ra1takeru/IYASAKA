@@ -1,0 +1,5 @@
+{
+  "name": "IYASAKA",
+  "description": "会員制マルシェイベントの告知、出展者登録、参加予約を管理するためのプラットフォームです。AIによるイベント説明生成機能も搭載しています。",
+  "requestFramePermissions": []
+}

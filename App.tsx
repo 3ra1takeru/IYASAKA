@@ -1,0 +1,1562 @@
+
+import React, { useState, useRef, useEffect } from 'react';
+import Header from './components/Header';
+import Footer from './components/Footer';
+import EventCard from './components/EventCard';
+import AuthModal from './components/AuthModal';
+import Modal from './components/Modal';
+import EventForm from './components/EventForm';
+import { User, Event, Provider, EventReservation, UserRole, EventRegistration, RegistrationStatus, OfferingType, Product, TimeSlot, TimeSlotBooking, Review, Favorite, EventType, Service, ServiceCategory, ServiceOrder, ServiceReview, ChatMessage } from './types';
+import ProviderDetailModal from './components/ProviderDetailModal';
+import EventRegistrationForm from './components/EventRegistrationForm';
+import EventProvidersModal from './components/EventProvidersModal';
+import { EditIcon, TrashIcon, InstagramIcon, StarIcon, ChatBubbleIcon, BriefcaseIcon, UserCircleIcon, QrcodeIcon } from './components/icons';
+import ServiceCard from './components/ServiceCard';
+import ServiceForm from './components/ServiceForm';
+
+// Helper functions for dynamic dates
+const getFutureDate = (daysToAdd: number): string => {
+  const date = new Date();
+  date.setDate(date.getDate() + daysToAdd);
+  return date.toISOString().split('T')[0];
+};
+
+const getPastDate = (daysToSubtract: number): string => {
+  const date = new Date();
+  date.setDate(date.getDate() - daysToSubtract);
+  return date.toISOString().split('T')[0];
+};
+
+const defaultLineSettings = {
+  eventReservations: true,
+  favoriteProviderUpdates: true,
+  serviceBookings: true,
+};
+
+// Mock Data
+const MOCK_USERS: User[] = [
+  { id: 'admin1', name: '管理者A', role: UserRole.ADMIN },
+  { id: 'provider1', name: '花屋さん', role: UserRole.PROVIDER, instagramId: 'hanaya_hidamari', isLineLinked: true, lineNotificationSettings: { ...defaultLineSettings } },
+  { id: 'provider2', name: 'パン屋さん', role: UserRole.PROVIDER, instagramId: 'komugi_bakery', isLineLinked: false, lineNotificationSettings: { ...defaultLineSettings } },
+  { id: 'provider3', name: '占い師さん', role: UserRole.PROVIDER, isLineLinked: false, lineNotificationSettings: { ...defaultLineSettings } },
+  { id: 'member1', name: '佐藤さん', role: UserRole.MEMBER, instagramId: 'sato_san_123', isLineLinked: true, lineNotificationSettings: { ...defaultLineSettings } },
+  { id: 'member2', name: '鈴木さん', role: UserRole.MEMBER, isLineLinked: false, lineNotificationSettings: { ...defaultLineSettings, favoriteProviderUpdates: false } },
+];
+
+const MOCK_PROVIDERS: Provider[] = [
+    { id: 'provider1', name: '花屋さん', providerName: '陽だまり生花店', description: '季節の花やドライフラワーを販売します。', profileImageUrl: 'https://picsum.photos/seed/flower-shop/200' },
+    { id: 'provider2', name: 'パン屋さん', providerName: 'こむぎの香りベーカリー', description: '国産小麦を使った焼きたてパンのお店です。', profileImageUrl: 'https://picsum.photos/seed/bakery/200' },
+    { id: 'provider3', name: '占い師さん', providerName: '星読みの館', description: 'タロットカードであなたの未来を占います。30分間のセッションです。', profileImageUrl: 'https://picsum.photos/seed/fortune-teller/200' },
+];
+
+const MOCK_PRODUCTS: { [key: string]: Product[] } = {
+  provider2: [
+    { id: 'prod1', name: '焼きたてクロワッサン', description: 'バターの香り豊かなサクサクのクロワッサン。', price: 300, imageUrl: 'https://picsum.photos/seed/croissant/200/200' },
+    { id: 'prod2', name: '天然酵母のカンパーニュ', description: '噛むほどに味わい深い、本格的な田舎パン。', price: 500, imageUrl: 'https://picsum.photos/seed/campagne/200/200' },
+  ],
+};
+
+const MOCK_TIMESLOTS: { [key: string]: TimeSlot[] } = {
+    provider3: [
+        { id: 'ts1', startTime: '10:00', endTime: '10:30' },
+        { id: 'ts2', startTime: '10:30', endTime: '11:00' },
+        { id: 'ts3', startTime: '11:00', endTime: '11:30' },
+        { id: 'ts4', startTime: '13:00', endTime: '13:30' },
+        { id: 'ts5', startTime: '13:30', endTime: '14:00' },
+    ]
+};
+
+const PREFECTURES = [
+  '北海道', '青森県', '岩手県', '宮城県', '秋田県', '山形県', '福島県',
+  '茨城県', '栃木県', '群馬県', '埼玉県', '千葉県', '東京都', '神奈川県',
+  '新潟県', '富山県', '石川県', '福井県', '山梨県', '長野県', '岐阜県',
+  '静岡県', '愛知県', '三重県', '滋賀県', '京都府', '大阪府', '兵庫県',
+  '奈良県', '和歌山県', '鳥取県', '島根県', '岡山県', '広島県', '山口県',
+  '徳島県', '香川県', '愛媛県', '高知県', '福岡県', '佐賀県', '長崎県',
+  '熊本県', '大分県', '宮崎県', '鹿児島県', '沖縄県'
+];
+
+const MOCK_EVENTS: Event[] = [
+  { id: 'event-past-1', name: '春のオーガニックマルシェ', date: getPastDate(90), startTime: '10:00', endTime: '17:00', location: '東京都 代々木公園', description: '新鮮なオーガニック野菜や果物、手作りのジャムやパンが並びます。心地よい春の風を感じながら、特別な逸品を見つけに来てください。', imageUrl: 'https://picsum.photos/seed/spring-marche/800/600', isApprovalRequiredForVendors: true, eventType: EventType.MARCHE },
+  { id: 'event-future-1', name: '夏のクラフトフェア', date: getFutureDate(30), startTime: '11:00', endTime: '19:00', location: '神奈川県 赤レンガ倉庫', description: '全国から集まった作家による、個性豊かなアクセサリー、陶器、布小物などが並びます。あなただけのお気に入りを見つけてください。', imageUrl: 'https://picsum.photos/seed/craft-fair/800/600', isApprovalRequiredForVendors: true, eventType: EventType.MARCHE },
+  { id: 'event-future-3', name: 'Webデザイナ交流会', date: getFutureDate(45), startTime: '19:00', endTime: '21:00', location: '大阪府 co-working space ABC', description: 'Webデザイナーやフロントエンドエンジニア向けの交流会です。軽食をとりながら、情報交換やネットワーキングを楽しみましょう。', imageUrl: 'https://picsum.photos/seed/meetup/800/600', isApprovalRequiredForVendors: false, eventType: EventType.SEMINAR_MEETUP },
+  { id: 'event-future-2', name: '秋の手作り市', date: getFutureDate(90), startTime: '10:00', endTime: '16:00', location: '京都府 梅小路公園', description: '温かみのある手作り雑貨やアート作品が勢揃い。作家さんとの会話も楽しみながら、お気に入りの一品を探してみませんか。', imageUrl: 'https://picsum.photos/seed/autumn-market/800/600', isApprovalRequiredForVendors: true, eventType: EventType.MARCHE }
+];
+
+const MOCK_EVENT_REGISTRATIONS: EventRegistration[] = [
+    { id: 'reg1', eventId: 'event-past-1', providerId: 'provider1', status: RegistrationStatus.APPROVED, offeringType: OfferingType.GOODS, products: [], timeSlots: [] },
+    { id: 'reg2', eventId: 'event-past-1', providerId: 'provider2', status: RegistrationStatus.APPROVED, offeringType: OfferingType.GOODS, products: MOCK_PRODUCTS.provider2, timeSlots: [] },
+    { id: 'reg3', eventId: 'event-future-1', providerId: 'provider2', status: RegistrationStatus.DRAFT, offeringType: OfferingType.GOODS, products: [], timeSlots: [], notes: '検討中' },
+    { id: 'reg4', eventId: 'event-future-1', providerId: 'provider3', status: RegistrationStatus.APPROVED, offeringType: OfferingType.SERVICE, products: [], timeSlots: MOCK_TIMESLOTS.provider3, isOnlineBookingEnabled: true },
+    { id: 'reg5', eventId: 'event-future-1', providerId: 'provider1', status: RegistrationStatus.APPROVED, offeringType: OfferingType.GOODS, products: [], timeSlots: [] },
+    { id: 'reg6', eventId: 'event-future-2', providerId: 'provider1', status: RegistrationStatus.APPROVED, offeringType: OfferingType.GOODS, products: [], timeSlots: [] },
+    { id: 'reg7', eventId: 'event-future-2', providerId: 'provider3', status: RegistrationStatus.SUBMITTED, offeringType: OfferingType.SERVICE, products: [], timeSlots: MOCK_TIMESLOTS.provider3, isOnlineBookingEnabled: true },
+];
+
+const MOCK_REVIEWS: Review[] = [
+    { id: 'rev1', eventId: 'event-past-1', providerId: 'provider1', userId: 'member1', rating: 5, comment: 'とても素敵なブーケを作っていただきました！対応も丁寧で、またお願いしたいです。', createdAt: getPastDate(89) },
+    { id: 'rev2', eventId: 'event-past-1', providerId: 'provider2', userId: 'member1', rating: 4, comment: 'クロワッサンが絶品でした。外はサクサク、中はもっちり。少し値段は張りますが、食べる価値ありです！', createdAt: getPastDate(89) },
+];
+
+const MOCK_SERVICES: Service[] = [
+    { id: 'service1', providerId: 'provider3', title: 'あなたの未来を占うタロットリーディング', description: '恋愛、仕事、人間関係など、どんなお悩みでもご相談ください。タロットカードがあなたを導きます。', category: ServiceCategory.FORTUNE, price: 3000, imageUrl: 'https://picsum.photos/seed/tarot/400/300', deliveryMethod: 'online', status: 'open' },
+    { id: 'service2', providerId: 'provider1', title: 'オーダーメイドの記念日ブーケ', description: '誕生日や記念日に、世界で一つだけの特別なブーケをお作りします。色や花の種類などご希望をお聞かせください。', category: ServiceCategory.OTHER, price: 5000, imageUrl: 'https://picsum.photos/seed/bouquet/400/300', deliveryMethod: 'offline', status: 'open' },
+];
+
+const MOCK_SERVICE_ORDERS: ServiceOrder[] = [
+    { id: 'order1', serviceId: 'service2', buyerId: 'member1', providerId: 'provider1', status: 'requested', createdAt: getPastDate(2)},
+    { id: 'order2', serviceId: 'service1', buyerId: 'member2', providerId: 'provider3', status: 'completed', createdAt: getPastDate(10)},
+];
+
+const MOCK_SERVICE_REVIEWS: ServiceReview[] = [
+    { id: 'srev1', serviceId: 'service1', userId: 'member2', rating: 5, comment: 'とても当たっていて驚きました。的確なアドバイスで、前向きな気持ちになれました。ありがとうございました！', createdAt: getPastDate(9) },
+];
+
+const MOCK_CHAT_MESSAGES: ChatMessage[] = [
+    { id: 'msg1', orderId: 'order1', senderId: 'member1', receiverId: 'provider1', message: 'こんにちは！ブーケの件でご相談です。記念日のプレゼントで、ピンク色を基調とした華やかな雰囲気でお願いしたいのですが、ご予算5000円で可能でしょうか？', createdAt: new Date(new Date(getPastDate(2)).getTime() + 1000 * 60 * 5).toISOString() },
+    { id: 'msg2', orderId: 'order1', senderId: 'provider1', receiverId: 'member1', message: '佐藤さん、こんにちは！ご相談ありがとうございます。もちろんです、ご予算5000円で素敵なブーケをお作りしますよ。ピンクのバラやガーベラをメインに、季節の小花を添えるのはいかがでしょうか？', createdAt: new Date(new Date(getPastDate(2)).getTime() + 1000 * 60 * 15).toISOString() },
+    { id: 'msg3', orderId: 'order1', senderId: 'member1', receiverId: 'provider1', message: 'ありがとうございます！ぜひその内容でお願いします。とても楽しみです。', createdAt: new Date(new Date(getPastDate(2)).getTime() + 1000 * 60 * 20).toISOString() },
+];
+
+
+// --- NEW COMPONENT DEFINITION ---
+interface ServiceDetailModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  service: Service | null;
+  provider: Provider | null;
+  currentUser: User | null;
+  onRequestService: (serviceId: string) => void;
+  reviews: ServiceReview[];
+  serviceOrders: ServiceOrder[];
+  users: User[];
+  onAddReview: (review: Omit<ServiceReview, 'id' | 'createdAt'>) => void;
+}
+
+const StarRatingDisplay = ({ rating, className = "w-5 h-5" }: { rating: number, className?: string }) => (
+  <div className="flex items-center">
+    {[...Array(5)].map((_, i) => (
+      <StarIcon key={i} className={`${className} ${i < rating ? 'text-yellow-400' : 'text-stone-300'}`} filled={i < rating} />
+    ))}
+  </div>
+);
+
+
+const ServiceDetailModal: React.FC<ServiceDetailModalProps> = ({ isOpen, onClose, service, provider, currentUser, onRequestService, reviews, serviceOrders, users, onAddReview }) => {
+  if (!isOpen || !service || !provider) return null;
+  
+  const [newRating, setNewRating] = useState(0);
+  const [newComment, setNewComment] = useState('');
+  const [hoverRating, setHoverRating] = useState(0);
+
+  const canRequest = currentUser && currentUser.role === UserRole.MEMBER && currentUser.id !== service.providerId;
+  const serviceReviews = reviews.filter(r => r.serviceId === service.id).sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  const averageRating = serviceReviews.length > 0 ? serviceReviews.reduce((sum, r) => sum + r.rating, 0) / serviceReviews.length : 0;
+  
+  const canPostReview = currentUser && 
+      serviceOrders.some(o => o.serviceId === service.id && o.buyerId === currentUser.id && o.status === 'completed') &&
+      !serviceReviews.some(r => r.serviceId === service.id && r.userId === currentUser.id);
+
+  const handleAddReview = () => {
+    if (newRating > 0 && newComment.trim() && currentUser) {
+        onAddReview({
+            serviceId: service.id,
+            userId: currentUser.id,
+            rating: newRating,
+            comment: newComment,
+        });
+        setNewRating(0);
+        setNewComment('');
+    }
+  };
+
+  return (
+    <Modal isOpen={isOpen} onClose={onClose} title="サービス詳細">
+      <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
+        <img src={service.imageUrl} alt={service.title} className="w-full h-56 object-cover rounded-lg" />
+        
+        <div>
+            <span className="text-sm font-semibold uppercase text-blue-600 bg-blue-100 px-2 py-1 rounded-full">{service.category}</span>
+            <h2 className="text-3xl font-bold text-stone-800 mt-2">{service.title}</h2>
+        </div>
+
+        <div className="flex items-center justify-between pt-4 border-t">
+             <div className="flex items-center text-md text-stone-700">
+                <img src={provider.profileImageUrl} alt={provider.providerName} className="w-10 h-10 rounded-full object-cover mr-3" />
+                <span className="font-semibold">{provider.providerName}</span>
+            </div>
+            <span className="text-2xl font-bold text-blue-800">&yen;{service.price.toLocaleString()}</span>
+        </div>
+        
+        <div className="space-y-2">
+            <h3 className="font-semibold text-stone-700">サービス内容</h3>
+            <p className="text-stone-600 whitespace-pre-wrap">{service.description}</p>
+        </div>
+        <div className="space-y-2">
+            <h3 className="font-semibold text-stone-700">提供方法</h3>
+            <p className="text-stone-600 capitalize">{service.deliveryMethod === 'both' ? 'オンライン & 対面' : service.deliveryMethod}</p>
+        </div>
+
+        {/* Reviews Section */}
+        <div className="pt-4 border-t">
+            <div className="flex items-center gap-4 mb-3">
+                <h4 className="font-semibold text-stone-800 mb-0">口コミ ({serviceReviews.length}件)</h4>
+                {serviceReviews.length > 0 && (
+                    <div className="flex items-center gap-2">
+                        <StarRatingDisplay rating={averageRating} />
+                        <span className="font-bold text-stone-700">{averageRating.toFixed(1)}</span>
+                    </div>
+                )}
+            </div>
+
+            {serviceReviews.length > 0 ? (
+                <div className="space-y-4">
+                    {serviceReviews.map(review => {
+                        const reviewer = users.find(u => u.id === review.userId);
+                        return (
+                        <div key={review.id} className="bg-stone-50 p-3 rounded-md">
+                            <div className="flex items-center justify-between mb-1">
+                                <div className="flex items-center gap-2">
+                                    <UserCircleIcon className="w-5 h-5 text-stone-400"/>
+                                    <p className="font-semibold text-sm text-stone-700">{reviewer?.name || '匿名ユーザー'}</p>
+                                </div>
+                                <StarRatingDisplay rating={review.rating} className="w-4 h-4"/>
+                            </div>
+                            <p className="text-stone-600 text-sm">{review.comment}</p>
+                            <p className="text-right text-xs text-stone-400 mt-1">{review.createdAt}</p>
+                        </div>
+                        )
+                    })}
+                </div>
+            ) : (
+                <p className="text-sm text-stone-500">まだ口コミはありません。</p>
+            )}
+        </div>
+
+        {/* Review Form Section */}
+        {canPostReview && (
+            <div className="pt-4 border-t">
+                 <h4 className="font-semibold text-stone-800 mb-2">このサービスの口コミを投稿する</h4>
+                 <div className="space-y-3">
+                    <div>
+                        <label className="text-sm font-medium text-stone-600">評価</label>
+                        <div className="flex items-center mt-1">
+                            {[...Array(5)].map((_, i) => (
+                            <button key={i} onClick={() => setNewRating(i + 1)} onMouseOver={() => setHoverRating(i+1)} onMouseOut={() => setHoverRating(0)}>
+                                <StarIcon 
+                                    className={`w-7 h-7 cursor-pointer transition-colors ${(hoverRating || newRating) > i ? 'text-yellow-400' : 'text-stone-300'}`} 
+                                    filled={(hoverRating || newRating) > i}
+                                />
+                            </button>
+                            ))}
+                        </div>
+                    </div>
+                     <div>
+                        <label className="text-sm font-medium text-stone-600">コメント</label>
+                        <textarea 
+                            value={newComment} 
+                            onChange={e => setNewComment(e.target.value)} 
+                            rows={3} 
+                            placeholder="サービスの感想を教えてください"
+                            className="mt-1 block w-full px-3 py-2 bg-white border border-stone-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        />
+                    </div>
+                    <div className="text-right">
+                        <button onClick={handleAddReview} disabled={!newRating || !newComment.trim()} className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:bg-stone-300">投稿する</button>
+                    </div>
+                 </div>
+            </div>
+        )}
+
+
+        <div className="pt-4 border-t">
+            {canRequest ? (
+                <button 
+                    onClick={() => onRequestService(service.id)}
+                    className="w-full bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center font-bold text-lg"
+                >
+                    <BriefcaseIcon className="w-6 h-6 mr-2" />
+                    このサービスについて相談する
+                </button>
+            ) : (
+                <div className="text-center p-3 bg-stone-100 rounded-md text-stone-600">
+                    {currentUser?.id === service.providerId 
+                        ? "ご自身のサービスです。"
+                        : "サービスに申し込むには会員としてログインしてください。"
+                    }
+                </div>
+            )}
+        </div>
+      </div>
+    </Modal>
+  );
+};
+
+
+const renderServiceStatus = (status: ServiceOrder['status']) => {
+    const styles = {
+        requested: "bg-yellow-100 text-yellow-800",
+        accepted: "bg-blue-100 text-blue-800",
+        completed: "bg-green-100 text-green-800",
+        cancelled: "bg-stone-200 text-stone-700",
+    };
+    const text = {
+        requested: "リクエスト中",
+        accepted: "進行中",
+        completed: "完了",
+        cancelled: "キャンセル",
+    };
+    return <span className={`px-2 py-1 text-xs font-medium rounded-full ${styles[status]}`}>{text[status]}</span>;
+}
+
+interface ChatSession {
+  id: string; // orderId or bookingId
+  providerId: string;
+  buyerId: string; // userId of the member
+  title: string;
+}
+
+interface ChatModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  session: ChatSession | null;
+  currentUser: User | null;
+  messages: ChatMessage[];
+  onSendMessage: (sessionId: string, messageText: string) => void;
+  users: User[];
+  providers: Provider[];
+}
+
+const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, session, currentUser, messages, onSendMessage, users, providers }) => {
+  const [newMessage, setNewMessage] = useState('');
+  const chatEndRef = useRef<null | HTMLDivElement>(null);
+
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, isOpen]);
+
+
+  if (!isOpen || !session || !currentUser) return null;
+
+  const isProvider = currentUser.id === session.providerId;
+  const otherUserId = isProvider ? session.buyerId : session.providerId;
+  const otherUser = isProvider 
+      ? users.find(u => u.id === otherUserId) 
+      : providers.find(p => p.id === otherUserId);
+  const otherUserName = isProvider ? otherUser?.name : (otherUser as Provider)?.providerName;
+
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newMessage.trim()) {
+      onSendMessage(session.id, newMessage.trim());
+      setNewMessage('');
+    }
+  };
+
+  return (
+    <Modal isOpen={isOpen} onClose={onClose} title={`${otherUserName}とのメッセージ`}>
+      <div className="flex flex-col h-[60vh]">
+        <div className="bg-stone-100 p-2 text-sm text-stone-600 mb-2 rounded-md text-center">
+            <span className="font-semibold">{session.title}</span> に関するメッセージ
+        </div>
+        <div className="flex-grow overflow-y-auto p-4 bg-stone-50 rounded-md space-y-4">
+          {messages.length > 0 ? messages.map(msg => {
+            const isMyMessage = msg.senderId === currentUser.id;
+            return (
+              <div key={msg.id} className={`flex items-end gap-2 ${isMyMessage ? 'justify-end' : 'justify-start'}`}>
+                <div className={`max-w-xs md:max-w-md p-3 rounded-lg ${isMyMessage ? 'bg-blue-500 text-white rounded-br-none' : 'bg-white text-stone-700 rounded-bl-none border'}`}>
+                  <p className="text-sm">{msg.message}</p>
+                  <p className={`text-xs mt-1 ${isMyMessage ? 'text-blue-100' : 'text-stone-400'} text-right`}>
+                    {new Date(msg.createdAt).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}
+                  </p>
+                </div>
+              </div>
+            )
+          }) : <p className="text-center text-stone-500">まだメッセージはありません。</p>}
+          <div ref={chatEndRef} />
+        </div>
+        <form onSubmit={handleSubmit} className="mt-4 flex gap-2">
+          <input
+            type="text"
+            value={newMessage}
+            onChange={e => setNewMessage(e.target.value)}
+            placeholder="メッセージを入力..."
+            className="flex-grow block w-full px-3 py-2 bg-white border border-stone-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+          />
+          <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:bg-blue-300" disabled={!newMessage.trim()}>送信</button>
+        </form>
+      </div>
+    </Modal>
+  );
+};
+
+
+// New Component: QR Code Modal for Members
+interface QRCodeModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    data: string;
+    title: string;
+}
+
+const QRCodeModal: React.FC<QRCodeModalProps> = ({ isOpen, onClose, data, title }) => {
+    if (!isOpen) return null;
+    
+    // Using a reliable public API for QR code generation
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(data)}`;
+
+    return (
+        <Modal isOpen={isOpen} onClose={onClose} title={title}>
+            <div className="flex flex-col items-center space-y-4 p-4">
+                <p className="text-sm text-stone-600 text-center">受付でこのQRコードを提示してください。</p>
+                <div className="border-4 border-stone-200 rounded-xl p-2 bg-white">
+                    <img src={qrUrl} alt="QR Code" className="w-64 h-64" />
+                </div>
+                <div className="text-xs text-stone-400 break-all text-center max-w-[250px]">
+                    ID: {data}
+                </div>
+                <button onClick={onClose} className="w-full bg-stone-200 text-stone-800 py-2 rounded-lg hover:bg-stone-300">閉じる</button>
+            </div>
+        </Modal>
+    );
+};
+
+// New Component: Scan Modal for Providers
+interface ScanModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    onScan: (ticketId: string) => void;
+}
+
+const ScanModal: React.FC<ScanModalProps> = ({ isOpen, onClose, onScan }) => {
+    const [ticketIdInput, setTicketIdInput] = useState('');
+    
+    if (!isOpen) return null;
+
+    const handleScanSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (ticketIdInput.trim()) {
+            onScan(ticketIdInput.trim());
+            setTicketIdInput('');
+        }
+    }
+
+    return (
+        <Modal isOpen={isOpen} onClose={onClose} title="QR受付スキャン">
+            <div className="space-y-6 p-2">
+                <div className="bg-stone-900 h-48 rounded-lg flex items-center justify-center text-stone-400 flex-col">
+                    <QrcodeIcon className="w-12 h-12 mb-2"/>
+                    <p className="text-sm">カメラを起動中... (シミュレーション)</p>
+                </div>
+                
+                <div className="text-center">
+                    <p className="text-sm text-stone-600 mb-2">または、チケットIDを手入力してください</p>
+                    <form onSubmit={handleScanSubmit} className="flex gap-2">
+                        <input 
+                            type="text" 
+                            value={ticketIdInput}
+                            onChange={e => setTicketIdInput(e.target.value)}
+                            placeholder="ticket-event-user"
+                            className="flex-grow p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                        />
+                        <button type="submit" className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">確認</button>
+                    </form>
+                </div>
+            </div>
+        </Modal>
+    );
+}
+
+
+const App: React.FC = () => {
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [users, setUsers] = useState<User[]>(MOCK_USERS);
+  const [events, setEvents] = useState<Event[]>(MOCK_EVENTS);
+  const [providers, setProviders] = useState<Provider[]>(MOCK_PROVIDERS);
+  const [eventReservations, setEventReservations] = useState<EventReservation[]>([]);
+  const [eventRegistrations, setEventRegistrations] = useState<EventRegistration[]>(MOCK_EVENT_REGISTRATIONS);
+  const [timeSlotBookings, setTimeSlotBookings] = useState<TimeSlotBooking[]>([]);
+  const [reviews, setReviews] = useState<Review[]>(MOCK_REVIEWS);
+  const [favorites, setFavorites] = useState<Favorite[]>([]);
+  const [services, setServices] = useState<Service[]>(MOCK_SERVICES);
+  const [serviceOrders, setServiceOrders] = useState<ServiceOrder[]>(MOCK_SERVICE_ORDERS);
+  const [serviceReviews, setServiceReviews] = useState<ServiceReview[]>(MOCK_SERVICE_REVIEWS);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>(MOCK_CHAT_MESSAGES);
+
+
+  const [view, setView] = useState<'home' | 'dashboard' | 'serviceList'>('home');
+  const [isAuthModalOpen, setAuthModalOpen] = useState(false);
+  const [isEventFormOpen, setEventFormOpen] = useState(false);
+  const [isServiceFormOpen, setServiceFormOpen] = useState(false);
+  const [isRegistrationFormOpen, setRegistrationFormOpen] = useState(false);
+  const [registrationFormData, setRegistrationFormData] = useState<{eventId: string, registrationId?: string} | null>(null);
+  const [isProviderDetailOpen, setProviderDetailOpen] = useState(false);
+  const [selectedProviderInfo, setSelectedProviderInfo] = useState<{provider: Provider, registration: EventRegistration} | null>(null);
+  const [isGenericModalOpen, setGenericModalOpen] = useState(false);
+  const [genericModalContent, setGenericModalContent] = useState({ title: '', message: ''});
+  
+  const [isEventProvidersModalOpen, setEventProvidersModalOpen] = useState(false);
+  const [selectedEventForProviders, setSelectedEventForProviders] = useState<Event | null>(null);
+  const [isServiceDetailOpen, setServiceDetailOpen] = useState(false);
+  const [selectedServiceInfo, setSelectedServiceInfo] = useState<{service: Service, provider: Provider} | null>(null);
+  const [isChatModalOpen, setChatModalOpen] = useState(false);
+  const [selectedChatSession, setSelectedChatSession] = useState<ChatSession | null>(null);
+  
+  const [isQRModalOpen, setQRModalOpen] = useState(false);
+  const [qrData, setQrData] = useState<{data: string, title: string} | null>(null);
+  
+  const [isScanModalOpen, setScanModalOpen] = useState(false);
+
+  const receivedBookings = currentUser ? timeSlotBookings.filter(b => b.providerId === currentUser.id) : [];
+
+
+  // --- Handle LINE Login Callback ---
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('code');
+    // const state = params.get('state'); // In a real app, verify state to prevent CSRF
+
+    if (code) {
+        // Backend simulation: Exchange code for access_token, then get profile.
+        // For this frontend-only demo, we assume success if 'code' is present.
+        // We will "log in" as a user (creating a new one or picking an existing one).
+        
+        console.log("LINE Login Code received:", code);
+        
+        // Mocking user retrieval. In production, this would be an API call.
+        // Let's assume the user is "member1" (Sato-san) for this simulation, or create a new "LINE User".
+        // To make it distinct, we'll login as member1 but ensure isLineLinked is true.
+        const mockLineUser = users.find(u => u.id === 'member1');
+        
+        if (mockLineUser) {
+            const updatedUser = { ...mockLineUser, isLineLinked: true };
+            // Update user list state
+            setUsers(prev => prev.map(u => u.id === updatedUser.id ? updatedUser : u));
+            setCurrentUser(updatedUser);
+            
+            // Clean the URL
+            window.history.replaceState({}, document.title, window.location.pathname);
+            
+            showMessage('LINEログイン成功', 'LINEアカウントでの認証に成功しました。（シミュレーション）\n公式アカウントと友だち連携が完了している場合、通知が届きます。');
+        }
+    }
+  }, [users]);
+
+
+  const showMessage = (title: string, message: string) => {
+    setGenericModalContent({ title, message });
+    setGenericModalOpen(true);
+  };
+
+  const handleLogin = (user: User) => {
+    const latestUser = users.find(u => u.id === user.id) || user;
+    setCurrentUser(latestUser);
+    setView('home');
+  };
+  
+  const handleLineLogin = (userToLink: User) => {
+    // Simulate LINE login. Find a demo user, mark as LINE linked, and log in.
+    const updatedUser = { ...userToLink, isLineLinked: true };
+    setUsers(prev => prev.map(u => u.id === updatedUser.id ? updatedUser : u));
+    setCurrentUser(updatedUser);
+    setView('home');
+    showMessage('LINEログイン成功', `${updatedUser.name}としてログインしました。LINEアカウントが連携されました。`);
+  };
+
+  const handleLogout = () => {
+    setCurrentUser(null);
+    setView('home');
+  };
+
+  const handleAddEvent = (newEventData: Omit<Event, 'id'>) => {
+    const newEvent: Event = { ...newEventData, id: `event${Date.now()}` };
+    setEvents(prev => [...prev, newEvent].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()));
+  };
+  
+  const handleAddService = (newServiceData: Omit<Service, 'id' | 'providerId' | 'status'>) => {
+    if (!currentUser || currentUser.role !== UserRole.PROVIDER) return;
+    const newService: Service = { 
+        ...newServiceData, 
+        id: `service${Date.now()}`,
+        providerId: currentUser.id,
+        status: 'open',
+    };
+    setServices(prev => [newService, ...prev]);
+  };
+
+  const handleMemberReserve = (eventId: string) => {
+    if (!currentUser || currentUser.role !== UserRole.MEMBER) return;
+    setEventReservations(prev => [...prev, { userId: currentUser.id, eventId }]);
+    let message = "イベントへの参加予約が完了しました。あなたと主催者に確認メールが送信されました（シミュレーション）。";
+    if (currentUser.isLineLinked && currentUser.lineNotificationSettings?.eventReservations) {
+      message += "\nLINEにも通知を送信しました。";
+    }
+    showMessage("予約完了", message);
+  };
+  
+  const handleCancelEventReservation = (eventId: string) => {
+    if (!currentUser) return;
+    setEventReservations(prev => prev.filter(r => !(r.eventId === eventId && r.userId === currentUser.id)));
+    let message = "イベントの参加予約をキャンセルしました。あなたと主催者にキャンセル確認メールが送信されました（シミュレーション）。";
+    if (currentUser.isLineLinked && currentUser.lineNotificationSettings?.eventReservations) {
+      message += "\nLINEにも通知を送信しました。";
+    }
+    showMessage("予約キャンセル", message);
+  }
+
+  const handleProviderRegisterClick = (eventId: string, registrationId?: string) => {
+    setRegistrationFormData({ eventId, registrationId });
+    setRegistrationFormOpen(true);
+  };
+  
+  const handleSaveRegistration = (registration: EventRegistration, providerUpdate?: Partial<Omit<Provider, 'id' | 'name'>>, userUpdate?: Partial<Omit<User, 'id' | 'role'>>) => {
+    if (currentUser?.role !== UserRole.PROVIDER) return;
+
+    const event = events.find(e => e.id === registration.eventId);
+    let finalRegistration = { ...registration };
+
+    if (event && event.isApprovalRequiredForVendors === false && finalRegistration.status === RegistrationStatus.SUBMITTED) {
+      finalRegistration.status = RegistrationStatus.APPROVED;
+    }
+    
+    setEventRegistrations(prev => {
+        const index = prev.findIndex(r => r.id === finalRegistration.id);
+        if (index > -1) {
+            const newRegs = [...prev];
+            newRegs[index] = finalRegistration;
+            return newRegs;
+        }
+        return [...prev, finalRegistration];
+    });
+
+    if (providerUpdate) {
+        setProviders(prev => prev.map(v => v.id === currentUser.id ? { ...v, ...providerUpdate } : v));
+    }
+
+    if (userUpdate) {
+        setUsers(prev => prev.map(u => u.id === currentUser.id ? { ...u, ...userUpdate } : u));
+        setCurrentUser(prev => prev ? { ...prev, ...userUpdate } : null);
+    }
+
+    setRegistrationFormOpen(false);
+    
+    let messageTitle = "保存しました";
+    let messageBody = "";
+    if (finalRegistration.status === RegistrationStatus.DRAFT) {
+        messageBody = "申込を下書き保存しました。";
+    } else if (finalRegistration.status === RegistrationStatus.APPROVED) {
+        messageBody = "出展申込が承認され、登録が完了しました。";
+    } else { // SUBMITTED
+        messageBody = "出展申込が完了しました。主催者の承認をお待ちください。";
+    }
+    showMessage(messageTitle, messageBody);
+  };
+
+  const handleSelectProvider = (provider: Provider, registration: EventRegistration) => {
+    setSelectedProviderInfo({ provider, registration });
+    setProviderDetailOpen(true);
+  };
+  
+  const handleShowAllProviders = (eventId: string) => {
+    const event = events.find(e => e.id === eventId);
+    if (event) {
+        setSelectedEventForProviders(event);
+        setEventProvidersModalOpen(true);
+    }
+  };
+
+  const handleBookTimeSlot = (eventId: string, providerId: string, timeSlotId: string, bookingType: 'online' | '現地') => {
+    if (!currentUser || currentUser.role !== UserRole.MEMBER) return;
+    setTimeSlotBookings(prev => [...prev, {id: `booking${Date.now()}`, userId: currentUser.id, eventId, providerId, timeSlotId, bookingType}]);
+    let message = `時間枠の予約が完了しました。(${bookingType}) あなたと出展者に確認メールが送信されました（シミュレーション）。`;
+    if (currentUser.isLineLinked && currentUser.lineNotificationSettings?.serviceBookings) {
+      message += "\nLINEにも通知を送信しました。";
+    }
+    showMessage("予約完了", message);
+  };
+
+  const handleCancelTimeSlotBooking = (bookingId: string) => {
+    if (!currentUser) return;
+    setTimeSlotBookings(prev => prev.filter(b => b.id !== bookingId));
+    let message = "時間枠の予約をキャンセルしました。あなたと出展者にキャンセル確認メールが送信されました（シミュレーション）。";
+     if (currentUser.isLineLinked && currentUser.lineNotificationSettings?.serviceBookings) {
+      message += "\nLINEにも通知を送信しました。";
+    }
+    showMessage("予約キャンセル", message);
+  }
+  
+  const handleAddReview = (reviewData: Omit<Review, 'id' | 'createdAt'>) => {
+    const newReview: Review = {
+        ...reviewData,
+        id: `rev${Date.now()}`,
+        createdAt: new Date().toISOString().split('T')[0],
+    };
+    setReviews(prev => [newReview, ...prev]);
+    showMessage("投稿完了", "口コミを投稿しました。ご協力ありがとうございます！");
+  };
+
+  const handleToggleFavorite = (providerId: string) => {
+    if (!currentUser || currentUser.role !== UserRole.MEMBER) {
+      showMessage("ログインが必要です", "お気に入り機能を利用するには会員としてログインしてください。");
+      return;
+    }
+    setFavorites(prev => {
+      const isFavorited = prev.some(f => f.userId === currentUser.id && f.providerId === providerId);
+      if (isFavorited) {
+        showMessage("お気に入り解除", "お気に入りから削除しました。");
+        return prev.filter(f => !(f.userId === currentUser.id && f.providerId === providerId));
+      } else {
+        showMessage("お気に入り登録", "お気に入りに追加しました！");
+        return [...prev, { userId: currentUser.id, providerId }];
+      }
+    });
+  };
+
+  const handleLinkLine = () => {
+    if (!currentUser) return;
+    // For demo purposes when clicking "Link LINE" from dashboard, just simulate.
+    // In real app, this would also redirect to Auth URL but with state tracking to link account.
+    const updatedUser = { ...currentUser, isLineLinked: true };
+    setUsers(prev => prev.map(u => u.id === updatedUser.id ? updatedUser : u));
+    setCurrentUser(updatedUser);
+    showMessage("連携完了", "LINEアカウントとの連携が完了しました。");
+  };
+
+  const handleToggleLineNotification = (key: keyof NonNullable<User['lineNotificationSettings']>, value: boolean) => {
+     if (!currentUser) return;
+     const updatedUser = {
+        ...currentUser,
+        lineNotificationSettings: {
+            ...currentUser.lineNotificationSettings,
+            [key]: value
+        } as NonNullable<User['lineNotificationSettings']>
+     };
+     setUsers(prev => prev.map(u => u.id === updatedUser.id ? updatedUser : u));
+     setCurrentUser(updatedUser);
+  };
+  
+  const handleSelectService = (service: Service) => {
+    const provider = providers.find(p => p.id === service.providerId);
+    if (provider) {
+        setSelectedServiceInfo({ service, provider });
+        setServiceDetailOpen(true);
+    }
+  };
+
+  const handleRequestService = (serviceId: string) => {
+    if (!currentUser || currentUser.role !== UserRole.MEMBER) {
+        showMessage("ログインが必要です", "サービスをリクエストするには会員としてログインしてください。");
+        return;
+    }
+    
+    const service = services.find(s => s.id === serviceId);
+    if (!service) return;
+
+    const existingOrder = serviceOrders.find(o => o.serviceId === serviceId && o.buyerId === currentUser.id);
+    if (existingOrder) {
+        showMessage("リクエスト済み", "このサービスは既に相談リクエストを送信済みです。提供者からの連絡をお待ちください。");
+        return;
+    }
+
+    const newOrder: ServiceOrder = {
+        id: `order${Date.now()}`,
+        serviceId: serviceId,
+        buyerId: currentUser.id,
+        providerId: service.providerId,
+        status: 'requested',
+        createdAt: new Date().toISOString().split('T')[0],
+    };
+    setServiceOrders(prev => [newOrder, ...prev]);
+    setServiceDetailOpen(false);
+    showMessage("リクエスト完了", "サービスについて相談リクエストを送信しました。提供者からの連絡をお待ちください。");
+  };
+  
+  const handleUpdateServiceOrderStatus = (orderId: string, newStatus: ServiceOrder['status']) => {
+    setServiceOrders(prev => prev.map(order => 
+        order.id === orderId ? { ...order, status: newStatus } : order
+    ));
+    let message = "";
+    switch(newStatus) {
+        case "accepted": message = "依頼を承認しました。"; break;
+        case "completed": message = "サービスを完了にしました。"; break;
+        case "cancelled": message = "依頼をキャンセルしました。"; break;
+    }
+    if (message) showMessage("ステータス更新", message);
+  };
+
+  const handleAddServiceReview = (reviewData: Omit<ServiceReview, 'id' | 'createdAt'>) => {
+    const newReview: ServiceReview = {
+        ...reviewData,
+        id: `srev${Date.now()}`,
+        createdAt: new Date().toISOString().split('T')[0],
+    };
+    setServiceReviews(prev => [newReview, ...prev]);
+    showMessage("投稿完了", "サービスの口コミを投稿しました。ご協力ありがとうございます！");
+  };
+  
+  const handleOpenChat = (session: ChatSession) => {
+    setSelectedChatSession(session);
+    setChatModalOpen(true);
+  };
+  
+  const handleSendMessage = (sessionId: string, messageText: string) => {
+    if (!currentUser || !selectedChatSession) return;
+
+    const newMessage: ChatMessage = {
+      id: `msg${Date.now()}`,
+      orderId: sessionId, // Reuse orderId for session ID (works for both orders and bookings)
+      senderId: currentUser.id,
+      receiverId: currentUser.id === selectedChatSession.providerId ? selectedChatSession.buyerId : selectedChatSession.providerId,
+      message: messageText,
+      createdAt: new Date().toISOString(),
+    };
+    setChatMessages(prev => [...prev, newMessage]);
+  };
+  
+  const handleShowQR = (title: string, data: string) => {
+      setQrData({ title, data });
+      setQRModalOpen(true);
+  };
+
+  const handleScanTicket = (ticketId: string) => {
+    // Ticket ID format: ticket-{eventId}-{userId}
+    const parts = ticketId.split('-');
+    if (parts.length < 3) {
+        showMessage("エラー", "無効なチケットIDです。");
+        return;
+    }
+    const eventId = parts[1] + (parts.length > 3 ? '-' + parts[2] : ''); // simple join for ids with hyphens if any, though ID structure might vary
+    // More robust parsing assuming format `ticket-{eventId}-{userId}` where eventId might have hyphens? 
+    // Actually our ID generation is `ticket-${event.id}-${currentUser.id}`.
+    // Let's iterate reservations to find a match.
+    
+    const reservation = eventReservations.find(r => `ticket-${r.eventId}-${r.userId}` === ticketId);
+    
+    if (reservation) {
+        const user = users.find(u => u.id === reservation.userId);
+        const event = events.find(e => e.id === reservation.eventId);
+        showMessage("受付完了", `${user?.name} 様\n${event?.name}\n\nチェックインを確認しました。`);
+        setScanModalOpen(false);
+    } else {
+        showMessage("エラー", "予約が見つかりません。チケットIDを確認してください。");
+    }
+  };
+
+
+  const HomePage = () => {
+    const [isFilterOpen, setIsFilterOpen] = useState(false);
+    const [searchType, setSearchType] = useState<'events' | 'services'>('events');
+
+    // Event filters
+    const [eventSearchFilters, setEventSearchFilters] = useState({
+      startDate: '',
+      endDate: '',
+      prefecture: '',
+      keyword: '',
+      includePast: false,
+    });
+
+    const handleEventFilterChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+      const { name, value, type } = e.target;
+      if (type === 'checkbox') {
+          const { checked } = e.target as HTMLInputElement;
+          setEventSearchFilters(prev => ({ ...prev, [name]: checked }));
+      } else {
+          setEventSearchFilters(prev => ({ ...prev, [name]: value }));
+      }
+    };
+
+    const resetEventFilters = () => {
+        setEventSearchFilters({
+            startDate: '',
+            endDate: '',
+            prefecture: '',
+            keyword: '',
+            includePast: false,
+        });
+    };
+
+    const filteredEvents = events
+      .filter(event => {
+        const { startDate, endDate, prefecture, keyword, includePast } = eventSearchFilters;
+        const lowerKeyword = keyword.toLowerCase();
+        const today = new Date().toISOString().split('T')[0];
+
+        if (!includePast && event.date < today) {
+            return false;
+        }
+
+        const startDateMatch = !startDate || event.date >= startDate;
+        const endDateMatch = !endDate || event.date <= endDate;
+        const prefectureMatch = !prefecture || event.location.includes(prefecture);
+        const keywordMatch = !keyword ||
+          event.name.toLowerCase().includes(lowerKeyword) ||
+          event.description.toLowerCase().includes(lowerKeyword);
+
+        return startDateMatch && endDateMatch && prefectureMatch && keywordMatch;
+      })
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+    // Service filters
+    const [serviceSearchFilters, setServiceSearchFilters] = useState({
+        keyword: '',
+        category: '',
+        maxPrice: '',
+        deliveryMethod: '',
+    });
+
+    const handleServiceFilterChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+        const { name, value } = e.target;
+        setServiceSearchFilters(prev => ({ ...prev, [name]: value }));
+    };
+
+    const resetServiceFilters = () => {
+        setServiceSearchFilters({
+            keyword: '',
+            category: '',
+            maxPrice: '',
+            deliveryMethod: '',
+        });
+    };
+
+    const filteredServices = services.filter(service => {
+        const { keyword, category, maxPrice, deliveryMethod } = serviceSearchFilters;
+        const lowerKeyword = keyword.toLowerCase();
+
+        const keywordMatch = !keyword || service.title.toLowerCase().includes(lowerKeyword) || service.description.toLowerCase().includes(lowerKeyword);
+        const categoryMatch = !category || service.category === category;
+        const priceMatch = !maxPrice || service.price <= parseInt(maxPrice, 10);
+        const deliveryMatch = !deliveryMethod || service.deliveryMethod === deliveryMethod || service.deliveryMethod === 'both';
+        
+        return keywordMatch && categoryMatch && priceMatch && deliveryMatch;
+    });
+
+    return (
+        <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="text-center mb-12">
+                <h1 className="text-4xl md:text-5xl font-extrabold text-green-800">心ときめく、出会いがここに</h1>
+                <p className="mt-4 text-lg text-stone-600 max-w-2xl mx-auto">想いが詰まった出会いを、特別な空間でお楽しみください。</p>
+            </div>
+            
+            <div className="bg-white rounded-lg shadow-md mb-12 overflow-hidden">
+                <div className="flex border-b border-stone-200">
+                    <button 
+                        onClick={() => { setSearchType('events'); setIsFilterOpen(false); }} 
+                        className={`flex-1 py-4 text-center font-bold text-lg transition-colors ${searchType === 'events' ? 'text-green-700 border-b-2 border-green-600 bg-green-50' : 'text-stone-500 hover:bg-stone-50'}`}
+                    >
+                        イベントを探す
+                    </button>
+                    <button 
+                        onClick={() => { setSearchType('services'); setIsFilterOpen(false); }} 
+                        className={`flex-1 py-4 text-center font-bold text-lg transition-colors ${searchType === 'services' ? 'text-blue-700 border-b-2 border-blue-600 bg-blue-50' : 'text-stone-500 hover:bg-stone-50'}`}
+                    >
+                        サービスを探す
+                    </button>
+                </div>
+                
+                <div className="p-6">
+                    {/* Keyword Input Area */}
+                    <div className="flex flex-col md:flex-row gap-4">
+                        <div className="flex-grow relative">
+                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-stone-400" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
+                                </svg>
+                            </div>
+                            <input
+                                type="text"
+                                name="keyword"
+                                value={searchType === 'events' ? eventSearchFilters.keyword : serviceSearchFilters.keyword}
+                                onChange={searchType === 'events' ? handleEventFilterChange : handleServiceFilterChange}
+                                placeholder={searchType === 'events' ? "イベント名、キーワードで検索..." : "サービス名、キーワードで検索..."}
+                                className="block w-full pl-10 pr-3 py-3 border border-stone-300 rounded-lg leading-5 bg-white placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 sm:text-sm transition-shadow"
+                            />
+                        </div>
+                        <button
+                            onClick={() => setIsFilterOpen(!isFilterOpen)}
+                            className={`flex items-center justify-center px-6 py-3 border border-stone-300 rounded-lg text-sm font-medium transition-colors ${isFilterOpen ? 'bg-stone-100 text-stone-900' : 'bg-white text-stone-700 hover:bg-stone-50'}`}
+                        >
+                            <span className="mr-2">絞り込み条件</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 transition-transform duration-200 ${isFilterOpen ? 'transform rotate-180' : ''}`} viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    {/* Expanded Filters */}
+                    {isFilterOpen && (
+                        <div className="mt-6 pt-6 border-t border-stone-200 animate-fade-in-down">
+                            {searchType === 'events' && (
+                                <div className="space-y-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-stone-700 mb-1">期間</label>
+                                            <div className="flex items-center space-x-2">
+                                                <input type="date" name="startDate" value={eventSearchFilters.startDate} onChange={handleEventFilterChange} className="block w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500"/>
+                                                <span className="text-stone-400">〜</span>
+                                                <input type="date" name="endDate" value={eventSearchFilters.endDate} onChange={handleEventFilterChange} className="block w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500"/>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-stone-700 mb-1">都道府県</label>
+                                            <select name="prefecture" value={eventSearchFilters.prefecture} onChange={handleEventFilterChange} className="block w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500">
+                                                <option value="">すべて</option>
+                                                {PREFECTURES.map(p => <option key={p} value={p}>{p}</option>)}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <label className="flex items-center space-x-2 cursor-pointer">
+                                            <input type="checkbox" name="includePast" checked={eventSearchFilters.includePast} onChange={handleEventFilterChange} className="h-4 w-4 text-green-600 border-stone-300 rounded focus:ring-green-500"/>
+                                            <span className="text-sm text-stone-700">過去のイベントを含める</span>
+                                        </label>
+                                        <button onClick={resetEventFilters} className="text-sm text-stone-500 hover:text-red-500 underline">条件をクリア</button>
+                                    </div>
+                                </div>
+                            )}
+
+                            {searchType === 'services' && (
+                                <div className="space-y-4">
+                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-stone-700 mb-1">カテゴリ</label>
+                                            <select name="category" value={serviceSearchFilters.category} onChange={handleServiceFilterChange} className="block w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500">
+                                                <option value="">すべて</option>
+                                                {Object.values(ServiceCategory).map(c => <option key={c} value={c}>{c}</option>)}
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-stone-700 mb-1">上限価格</label>
+                                            <div className="relative">
+                                                <span className="absolute left-3 top-2 text-stone-500">¥</span>
+                                                <input type="number" name="maxPrice" value={serviceSearchFilters.maxPrice} onChange={handleServiceFilterChange} placeholder="例: 5000" min="0" className="block w-full pl-8 pr-3 py-2 bg-stone-50 border border-stone-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"/>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-stone-700 mb-1">提供方法</label>
+                                            <div className="flex items-center space-x-4 mt-2">
+                                                <label className="flex items-center"><input type="radio" name="deliveryMethod" value="" checked={serviceSearchFilters.deliveryMethod === ''} onChange={handleServiceFilterChange} className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-stone-300"/> <span className="ml-2 text-sm">すべて</span></label>
+                                                <label className="flex items-center"><input type="radio" name="deliveryMethod" value="online" checked={serviceSearchFilters.deliveryMethod === 'online'} onChange={handleServiceFilterChange} className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-stone-300"/> <span className="ml-2 text-sm">オンライン</span></label>
+                                                <label className="flex items-center"><input type="radio" name="deliveryMethod" value="offline" checked={serviceSearchFilters.deliveryMethod === 'offline'} onChange={handleServiceFilterChange} className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-stone-300"/> <span className="ml-2 text-sm">対面</span></label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="flex justify-end">
+                                        <button onClick={resetServiceFilters} className="text-sm text-stone-500 hover:text-red-500 underline">条件をクリア</button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            <div className="mb-12">
+                <h2 className="text-3xl font-bold text-stone-800 mb-6">注目のサービス</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {services.slice(0, 3).map(service => (
+                        <ServiceCard key={service.id} service={service} provider={providers.find(p => p.id === service.providerId)!} onSelect={handleSelectService}/>
+                    ))}
+                </div>
+                 <div className="text-center mt-6">
+                    <button onClick={() => setView('serviceList')} className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors">すべてのサービスを見る</button>
+                </div>
+            </div>
+            
+            {searchType === 'events' && (
+                <>
+                    <h2 className="text-3xl font-bold text-stone-800 mb-6 border-t pt-12">イベント一覧</h2>
+                    {filteredEvents.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            {filteredEvents.map((event) => (
+                            <EventCard
+                                key={event.id} event={event} user={currentUser}
+                                reservations={eventReservations} providers={providers}
+                                registrations={eventRegistrations}
+                                onMemberReserve={handleMemberReserve}
+                                onProviderRegister={handleProviderRegisterClick}
+                                onProviderSelect={handleSelectProvider}
+                                onShowAllProviders={handleShowAllProviders}
+                            />
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="text-center py-12 bg-white rounded-lg shadow-md">
+                            <h3 className="text-2xl font-semibold text-stone-700">お探しのイベントは見つかりませんでした</h3>
+                            <p className="text-stone-500 mt-2">検索条件を変更して、もう一度お試しください。</p>
+                        </div>
+                    )}
+                </>
+            )}
+
+            {searchType === 'services' && (
+                <>
+                    <h2 className="text-3xl font-bold text-stone-800 mb-6 border-t pt-12">サービス検索結果</h2>
+                    {filteredServices.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            {filteredServices.map((service) => (
+                            <ServiceCard
+                                key={service.id} service={service} 
+                                provider={providers.find(p => p.id === service.providerId)!} 
+                                onSelect={handleSelectService}
+                            />
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="text-center py-12 bg-white rounded-lg shadow-md">
+                            <h3 className="text-2xl font-semibold text-stone-700">お探しのサービスは見つかりませんでした</h3>
+                            <p className="text-stone-500 mt-2">検索条件を変更して、もう一度お試しください。</p>
+                        </div>
+                    )}
+                </>
+            )}
+        </main>
+    );
+  };
+  
+  const ServiceListPage = () => {
+    return (
+        <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <h1 className="text-3xl font-bold text-stone-800 mb-8">サービスを探す</h1>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {services.map(service => (
+                    <ServiceCard key={service.id} service={service} provider={providers.find(p => p.id === service.providerId)!} onSelect={handleSelectService} />
+                ))}
+            </div>
+        </main>
+    );
+  };
+
+  const DashboardPage = () => {
+    if (!currentUser) return <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">ログインしてください。</main>;
+
+    const myEventReservations = eventReservations.filter(r => r.userId === currentUser.id);
+    const myEventRegistrations = eventRegistrations.filter(r => r.providerId === currentUser.id);
+    const myTimeSlotBookings = timeSlotBookings.filter(b => b.userId === currentUser.id);
+    const myFavoriteProviders = favorites.filter(f => f.userId === currentUser.id);
+    const myServiceOrders = serviceOrders.filter(o => o.buyerId === currentUser.id);
+    const receivedServiceOrders = serviceOrders.filter(o => o.providerId === currentUser.id);
+
+    const registrationStatusText = {
+        [RegistrationStatus.DRAFT]: { text: '下書き', color: 'bg-yellow-100 text-yellow-800' },
+        [RegistrationStatus.SUBMITTED]: { text: '申請中', color: 'bg-blue-100 text-blue-800' },
+        [RegistrationStatus.APPROVED]: { text: '承認済', color: 'bg-green-100 text-green-800' },
+    };
+
+    return (
+        <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <h1 className="text-3xl font-bold text-stone-800 mb-8">ダッシュボード</h1>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div className="lg:col-span-2 space-y-8">
+                    {/* Member Dashboard */}
+                    {currentUser.role === UserRole.MEMBER && (
+                        <>
+                            <div className="bg-white p-6 rounded-lg shadow-md">
+                                <h2 className="text-xl font-bold text-stone-700 mb-4">予約したイベント</h2>
+                                {myEventReservations.length > 0 ? (
+                                    <ul className="space-y-3">
+                                        {myEventReservations.map(res => {
+                                            const event = events.find(e => e.id === res.eventId);
+                                            return event ? (
+                                                <li key={res.eventId} className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-3 bg-stone-50 rounded-md gap-3">
+                                                    <div>
+                                                        <p className="font-semibold">{event.name}</p>
+                                                        <p className="text-sm text-stone-500">{event.date} @ {event.location}</p>
+                                                    </div>
+                                                    <div className="flex gap-2">
+                                                        <button 
+                                                            onClick={() => handleShowQR(event.name, `ticket-${event.id}-${currentUser.id}`)}
+                                                            className="flex items-center text-sm bg-stone-800 text-white px-3 py-2 rounded-md hover:bg-stone-900 transition-colors"
+                                                        >
+                                                            <QrcodeIcon className="w-4 h-4 mr-1.5"/>
+                                                            チケットを表示
+                                                        </button>
+                                                        <button onClick={() => handleCancelEventReservation(event.id)} className="text-sm text-red-600 hover:text-red-800 border border-red-200 px-3 py-2 rounded-md hover:bg-red-50">キャンセル</button>
+                                                    </div>
+                                                </li>
+                                            ) : null;
+                                        })}
+                                    </ul>
+                                ) : <p className="text-stone-500">予約したイベントはありません。</p>}
+                            </div>
+                            <div className="bg-white p-6 rounded-lg shadow-md">
+                                <h2 className="text-xl font-bold text-stone-700 mb-4">予約した時間枠</h2>
+                                 {myTimeSlotBookings.length > 0 ? (
+                                    <ul className="space-y-3">
+                                        {myTimeSlotBookings.map(booking => {
+                                            const provider = providers.find(p => p.id === booking.providerId);
+                                            const event = events.find(e => e.id === booking.eventId);
+                                            const registration = eventRegistrations.find(r => r.providerId === booking.providerId && r.eventId === booking.eventId);
+                                            const timeSlot = registration?.timeSlots.find(ts => ts.id === booking.timeSlotId);
+                                            return (provider && event && timeSlot) ? (
+                                                <li key={booking.id} className="p-3 bg-stone-50 rounded-md">
+                                                    <div className="flex justify-between items-center">
+                                                        <div>
+                                                            <p className="font-semibold">{provider.providerName} - {timeSlot.startTime}~{timeSlot.endTime}</p>
+                                                            <p className="text-sm text-stone-500">{event.name} ({event.date})</p>
+                                                        </div>
+                                                        <div className="flex items-center gap-2">
+                                                            <span className={`text-xs font-medium px-2 py-1 rounded-full ${booking.bookingType === 'online' ? 'bg-cyan-100 text-cyan-800' : 'bg-green-100 text-green-800'}`}>
+                                                              {booking.bookingType}予約
+                                                            </span>
+                                                            <button onClick={() => handleOpenChat({
+                                                                id: booking.id,
+                                                                providerId: booking.providerId,
+                                                                buyerId: booking.userId,
+                                                                title: `${event.name} (${timeSlot.startTime}~)`
+                                                            })} className="text-blue-600 hover:text-blue-800 p-1" title="メッセージを送る">
+                                                                <ChatBubbleIcon className="w-5 h-5"/>
+                                                            </button>
+                                                            <button onClick={() => handleCancelTimeSlotBooking(booking.id)} className="text-sm text-red-600 hover:text-red-800 ml-2">キャンセル</button>
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                            ) : null;
+                                        })}
+                                    </ul>
+                                ) : <p className="text-stone-500">予約した時間枠はありません。</p>}
+                            </div>
+                             <div className="bg-white p-6 rounded-lg shadow-md">
+                                <h2 className="text-xl font-bold text-stone-700 mb-4">購入したサービス</h2>
+                                {myServiceOrders.length > 0 ? (
+                                    <ul className="space-y-3">
+                                        {myServiceOrders.map(order => {
+                                            const service = services.find(s => s.id === order.serviceId);
+                                            const provider = providers.find(p => p.id === order.providerId);
+                                            const canReview = order.status === 'completed' && !serviceReviews.some(r => r.serviceId === order.serviceId && r.userId === currentUser.id);
+                                            return (service && provider) ? (
+                                                <li key={order.id} className="p-3 bg-stone-50 rounded-md">
+                                                    <div className="flex justify-between items-start">
+                                                        <div>
+                                                            <p className="font-semibold">{service.title}</p>
+                                                            <p className="text-sm text-stone-500">提供者: {provider.providerName}</p>
+                                                            <p className="text-xs text-stone-400">依頼日: {order.createdAt}</p>
+                                                        </div>
+                                                        <div className="flex items-center gap-4">
+                                                            {renderServiceStatus(order.status)}
+                                                            <button onClick={() => handleOpenChat({
+                                                                id: order.id,
+                                                                providerId: order.providerId,
+                                                                buyerId: order.buyerId,
+                                                                title: service.title
+                                                            })} className="text-blue-600 hover:text-blue-800" title="メッセージを送る">
+                                                                <ChatBubbleIcon className="w-5 h-5"/>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                    {canReview && (
+                                                        <div className="text-right mt-2">
+                                                            <button onClick={() => handleSelectService(service)} className="text-sm bg-yellow-400 text-yellow-900 px-3 py-1 rounded-md hover:bg-yellow-500">レビューを書く</button>
+                                                        </div>
+                                                    )}
+                                                </li>
+                                            ) : null;
+                                        })}
+                                    </ul>
+                                ) : <p className="text-stone-500">購入したサービスはありません。</p>}
+                            </div>
+                        </>
+                    )}
+                    
+                    {/* Provider Dashboard */}
+                    {currentUser.role === UserRole.PROVIDER && (
+                        <>
+                            <div className="flex justify-between items-center bg-white p-6 rounded-lg shadow-md">
+                                <h2 className="text-xl font-bold text-stone-700">QR受付・スキャン</h2>
+                                <button onClick={() => setScanModalOpen(true)} className="flex items-center bg-stone-800 text-white px-4 py-2 rounded-lg hover:bg-stone-900">
+                                    <QrcodeIcon className="w-5 h-5 mr-2" />
+                                    受付を開始
+                                </button>
+                            </div>
+
+                             <div className="bg-white p-6 rounded-lg shadow-md">
+                                <h2 className="text-xl font-bold text-stone-700 mb-4">出展申込状況</h2>
+                                {myEventRegistrations.length > 0 ? (
+                                    <ul className="space-y-3">
+                                        {myEventRegistrations.map(reg => {
+                                            const event = events.find(e => e.id === reg.eventId);
+                                            return event ? (
+                                                <li key={reg.id} className="flex justify-between items-center p-3 bg-stone-50 rounded-md">
+                                                    <div>
+                                                        <p className="font-semibold">{event.name}</p>
+                                                        <p className="text-sm text-stone-500">{event.date}</p>
+                                                    </div>
+                                                    <div className="flex items-center space-x-4">
+                                                        <span className={`text-xs font-medium px-2 py-1 rounded-full ${registrationStatusText[reg.status].color}`}>{registrationStatusText[reg.status].text}</span>
+                                                        <button onClick={() => handleProviderRegisterClick(event.id, reg.id)} className="text-blue-600 hover:text-blue-800"><EditIcon className="w-5 h-5"/></button>
+                                                    </div>
+                                                </li>
+                                            ) : null;
+                                        })}
+                                    </ul>
+                                ) : <p className="text-stone-500">申込をしたイベントはありません。</p>}
+                            </div>
+                            <div className="bg-white p-6 rounded-lg shadow-md">
+                                <h2 className="text-xl font-bold text-stone-700 mb-4">受けた予約</h2>
+                                {receivedBookings.length > 0 ? (
+                                    <ul className="space-y-3">
+                                        {receivedBookings.map(booking => {
+                                            const user = users.find(u => u.id === booking.userId);
+                                            const event = events.find(e => e.id === booking.eventId);
+                                            const registration = eventRegistrations.find(r => r.providerId === currentUser.id && r.eventId === booking.eventId);
+                                            const timeSlot = registration?.timeSlots.find(ts => ts.id === booking.timeSlotId);
+                                            return (user && event && timeSlot) ? (
+                                                <li key={booking.id} className="p-3 bg-stone-50 rounded-md">
+                                                    <div className="flex justify-between items-center">
+                                                        <div>
+                                                            <p className="font-semibold">{user.name}さん - {timeSlot.startTime}~{timeSlot.endTime}</p>
+                                                            <p className="text-sm text-stone-500">{event.name} ({event.date})</p>
+                                                        </div>
+                                                        <div className="flex items-center gap-3">
+                                                            <span className={`text-xs font-medium px-2 py-1 rounded-full ${booking.bookingType === 'online' ? 'bg-cyan-100 text-cyan-800' : 'bg-green-100 text-green-800'}`}>
+                                                                {booking.bookingType}予約
+                                                            </span>
+                                                            <button onClick={() => handleOpenChat({
+                                                                id: booking.id,
+                                                                providerId: booking.providerId,
+                                                                buyerId: booking.userId,
+                                                                title: `${event.name} (${timeSlot.startTime}~)`
+                                                            })} className="text-blue-600 hover:text-blue-800 p-1" title="メッセージを送る">
+                                                                <ChatBubbleIcon className="w-5 h-5"/>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                            ) : null;
+                                        })}
+                                    </ul>
+                                ) : <p className="text-stone-500">まだ予約はありません。</p>}
+                            </div>
+                            <div className="bg-white p-6 rounded-lg shadow-md">
+                                <h2 className="text-xl font-bold text-stone-700 mb-4">受けた依頼</h2>
+                                {receivedServiceOrders.length > 0 ? (
+                                    <ul className="space-y-3">
+                                        {receivedServiceOrders.map(order => {
+                                            const service = services.find(s => s.id === order.serviceId);
+                                            const buyer = users.find(u => u.id === order.buyerId);
+                                            return (service && buyer) ? (
+                                                <li key={order.id} className="p-3 bg-stone-50 rounded-md">
+                                                    <div className="flex justify-between items-start mb-2">
+                                                        <div>
+                                                            <p className="font-semibold">{service.title}</p>
+                                                            <p className="text-sm text-stone-500">依頼者: {buyer.name}さん</p>
+                                                            <p className="text-xs text-stone-400">依頼日: {order.createdAt}</p>
+                                                        </div>
+                                                        <div className="flex items-center gap-4">
+                                                             {renderServiceStatus(order.status)}
+                                                              <button onClick={() => handleOpenChat({
+                                                                id: order.id,
+                                                                providerId: order.providerId,
+                                                                buyerId: order.buyerId,
+                                                                title: service.title
+                                                              })} className="text-blue-600 hover:text-blue-800" title="メッセージを送る">
+                                                                <ChatBubbleIcon className="w-5 h-5"/>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                    {order.status === 'requested' && (
+                                                        <div className="flex justify-end gap-2">
+                                                            <button onClick={() => handleUpdateServiceOrderStatus(order.id, 'cancelled')} className="text-sm bg-stone-200 text-stone-700 px-3 py-1 rounded-md hover:bg-stone-300">辞退</button>
+                                                            <button onClick={() => handleUpdateServiceOrderStatus(order.id, 'accepted')} className="text-sm bg-blue-600 text-white px-3 py-1 rounded-md hover:bg-blue-700">承認</button>
+                                                        </div>
+                                                    )}
+                                                     {order.status === 'accepted' && (
+                                                        <div className="flex justify-end gap-2">
+                                                            <button onClick={() => handleUpdateServiceOrderStatus(order.id, 'completed')} className="text-sm bg-green-600 text-white px-3 py-1 rounded-md hover:bg-green-700">完了にする</button>
+                                                        </div>
+                                                    )}
+                                                </li>
+                                            ) : null;
+                                        })}
+                                    </ul>
+                                ) : <p className="text-stone-500">まだ依頼はありません。</p>}
+                            </div>
+                        </>
+                    )}
+
+                </div>
+                {/* Right Sidebar */}
+                <div className="space-y-8">
+                     <div className="bg-white p-6 rounded-lg shadow-md">
+                        <h2 className="text-xl font-bold text-stone-700 mb-4">マイページ</h2>
+                        {currentUser.role === UserRole.MEMBER && (
+                             <div className="bg-white">
+                                <h3 className="text-lg font-bold text-stone-700 mb-4">お気に入り</h3>
+                                {myFavoriteProviders.length > 0 ? (
+                                    <ul className="space-y-3">
+                                        {myFavoriteProviders.map(fav => {
+                                            const provider = providers.find(p => p.id === fav.providerId);
+                                            return provider ? (
+                                                <li key={fav.providerId} className="flex items-center p-2 bg-stone-50 rounded-md">
+                                                    <img src={provider.profileImageUrl} alt={provider.providerName} className="w-8 h-8 rounded-full object-cover mr-3"/>
+                                                    <p className="font-semibold text-sm">{provider.providerName}</p>
+                                                </li>
+                                            ) : null;
+                                        })}
+                                    </ul>
+                                ) : <p className="text-stone-500">お気に入りの出展者はまだいません。</p>}
+                            </div>
+                        )}
+                         <div className="bg-white pt-6">
+                            <h3 className="text-lg font-bold text-stone-700 mb-4">LINE連携</h3>
+                            {currentUser.isLineLinked ? (
+                                <div className="space-y-3">
+                                    <p className="p-3 bg-green-100 text-green-800 rounded-md text-sm">LINEアカウントと連携済みです。</p>
+                                    <div>
+                                        <h4 className="font-semibold text-stone-600 text-md mb-2">通知設定</h4>
+                                        <div className="space-y-2">
+                                            <label className="flex items-center justify-between text-sm">
+                                                <span>イベント予約・キャンセル</span>
+                                                <input type="checkbox" checked={currentUser.lineNotificationSettings?.eventReservations} onChange={e => handleToggleLineNotification('eventReservations', e.target.checked)} className="h-4 w-4 rounded border-stone-300 text-green-600 focus:ring-green-500"/>
+                                            </label>
+                                            <label className="flex items-center justify-between text-sm">
+                                                <span>サービス予約・キャンセル</span>
+                                                 <input type="checkbox" checked={currentUser.lineNotificationSettings?.serviceBookings} onChange={e => handleToggleLineNotification('serviceBookings', e.target.checked)} className="h-4 w-4 rounded border-stone-300 text-green-600 focus:ring-green-500"/>
+                                            </label>
+                                            <label className="flex items-center justify-between text-sm">
+                                                <span>お気に入り出展者の新着情報</span>
+                                                 <input type="checkbox" checked={currentUser.lineNotificationSettings?.favoriteProviderUpdates} onChange={e => handleToggleLineNotification('favoriteProviderUpdates', e.target.checked)} className="h-4 w-4 rounded border-stone-300 text-green-600 focus:ring-green-500"/>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : (
+                                <button onClick={handleLinkLine} className="w-full flex items-center justify-center p-3 rounded-lg bg-[#06C755] text-white hover:bg-[#05b34c] transition-colors">
+                                    <ChatBubbleIcon className="w-5 h-5 mr-2"/>
+                                    LINEと連携する
+                                </button>
+                            )}
+                         </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    );
+  };
+  
+  return (
+    <div className="min-h-screen flex flex-col">
+      <Header
+        user={currentUser}
+        onLoginClick={() => setAuthModalOpen(true)}
+        onLogoutClick={handleLogout}
+        onCreateEventClick={() => setEventFormOpen(true)}
+        onCreateServiceClick={() => setServiceFormOpen(true)}
+        onDashboardClick={() => setView('dashboard')}
+        onHomeClick={() => setView('home')}
+        onServiceListClick={() => setView('serviceList')}
+      />
+      {view === 'home' && <HomePage />}
+      {view === 'serviceList' && <ServiceListPage />}
+      {view === 'dashboard' && <DashboardPage />}
+
+      <Footer />
+
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        onLogin={handleLogin}
+        onLineLogin={handleLineLogin}
+        users={users}
+      />
+      <Modal isOpen={isEventFormOpen} onClose={() => setEventFormOpen(false)} title="新しいイベントを作成">
+        <EventForm onAddEvent={handleAddEvent} onClose={() => setEventFormOpen(false)} />
+      </Modal>
+      <Modal isOpen={isServiceFormOpen} onClose={() => setServiceFormOpen(false)} title="新しいサービスを出品">
+        <ServiceForm onAddService={handleAddService} onClose={() => setServiceFormOpen(false)} />
+      </Modal>
+      <Modal isOpen={isRegistrationFormOpen} onClose={() => setRegistrationFormOpen(false)} title="出展申込">
+        {registrationFormData && currentUser?.role === UserRole.PROVIDER && (
+            <EventRegistrationForm
+                event={events.find(e => e.id === registrationFormData.eventId)!}
+                provider={providers.find(p => p.id === currentUser.id)!}
+                currentUser={currentUser}
+                existingRegistration={eventRegistrations.find(r => r.id === registrationFormData.registrationId)}
+                onSave={handleSaveRegistration}
+                onClose={() => setRegistrationFormOpen(false)}
+                hasBookings={receivedBookings.some(b => b.eventId === registrationFormData.eventId)}
+            />
+        )}
+      </Modal>
+      {selectedProviderInfo && (
+          <ProviderDetailModal
+            isOpen={isProviderDetailOpen}
+            onClose={() => setProviderDetailOpen(false)}
+            provider={selectedProviderInfo.provider}
+            registration={selectedProviderInfo.registration}
+            events={events}
+            registrations={eventRegistrations}
+            bookings={timeSlotBookings}
+            user={currentUser}
+            users={users}
+            onBookTimeSlot={handleBookTimeSlot}
+            reviews={reviews}
+            eventReservations={eventReservations}
+            onAddReview={handleAddReview}
+            isFavorite={currentUser ? favorites.some(f => f.userId === currentUser.id && f.providerId === selectedProviderInfo.provider.id) : false}
+            onToggleFavorite={handleToggleFavorite}
+          />
+      )}
+       {selectedEventForProviders && (
+            <EventProvidersModal
+                isOpen={isEventProvidersModalOpen}
+                onClose={() => setEventProvidersModalOpen(false)}
+                event={selectedEventForProviders}
+                providers={providers}
+                users={users}
+                registrations={eventRegistrations}
+                onProviderSelect={(provider, registration) => {
+                    setEventProvidersModalOpen(false);
+                    handleSelectProvider(provider, registration);
+                }}
+            />
+        )}
+       {selectedServiceInfo && (
+            <ServiceDetailModal
+                isOpen={isServiceDetailOpen}
+                onClose={() => setServiceDetailOpen(false)}
+                service={selectedServiceInfo.service}
+                provider={selectedServiceInfo.provider}
+                currentUser={currentUser}
+                onRequestService={handleRequestService}
+                reviews={serviceReviews}
+                serviceOrders={serviceOrders}
+                users={users}
+                onAddReview={handleAddServiceReview}
+            />
+       )}
+        <ChatModal
+            isOpen={isChatModalOpen}
+            onClose={() => setChatModalOpen(false)}
+            session={selectedChatSession}
+            currentUser={currentUser}
+            messages={chatMessages.filter(m => m.orderId === selectedChatSession?.id)}
+            onSendMessage={handleSendMessage}
+            users={users}
+            providers={providers}
+      />
+      {qrData && (
+          <QRCodeModal 
+            isOpen={isQRModalOpen} 
+            onClose={() => setQRModalOpen(false)} 
+            data={qrData.data} 
+            title={qrData.title} 
+          />
+      )}
+      <ScanModal
+        isOpen={isScanModalOpen}
+        onClose={() => setScanModalOpen(false)}
+        onScan={handleScanTicket}
+      />
+      <Modal isOpen={isGenericModalOpen} onClose={() => setGenericModalOpen(false)} title={genericModalContent.title}>
+        <p className="whitespace-pre-wrap">{genericModalContent.message}</p>
+        <div className="text-right mt-4">
+          <button onClick={() => setGenericModalOpen(false)} className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">閉じる</button>
+        </div>
+      </Modal>
+    </div>
+  );
+};
+
+export default App;
