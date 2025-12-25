@@ -935,7 +935,7 @@ const App: React.FC = () => {
     return (
         <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="text-center mb-12">
-                <h1 className="text-4xl md:text-5xl font-extrabold text-green-800">心ときめく、出会いがここに</h1>
+                <h1 className="text-4xl md:text-5xl font-extrabold text-green-800">幸せが広がる、ご縁結び</h1>
                 <p className="mt-4 text-lg text-stone-600 max-w-2xl mx-auto">想いが詰まった出会いを、特別な空間でお楽しみください。</p>
             </div>
             
