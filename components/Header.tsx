@@ -16,69 +16,67 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ user, onLoginClick, onLogoutClick, onCreateEventClick, onCreateServiceClick, onDashboardClick, onHomeClick, onServiceListClick }) => {
   return (
-    <header className="bg-white shadow-md sticky top-0 z-40">
+    <header className="bg-white/90 backdrop-blur-md shadow-sm border-b border-stone-200 sticky top-0 z-40">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center justify-between h-20">
           <div className="flex items-center space-x-2 sm:space-x-8">
-            <button onClick={onHomeClick} className="text-xl sm:text-2xl font-bold text-green-700 flex items-center shrink-0">
-              <span role="img" aria-label="leaf" className="mr-1 sm:mr-2">🌿</span>
-              <span>IYASAKA</span>
+            <button onClick={onHomeClick} className="group flex items-center shrink-0 transition-opacity hover:opacity-80">
+              <span className="text-2xl sm:text-3xl font-bold text-stone-800 tracking-widest font-serif">彌榮</span>
+              <span className="ml-2 text-xs sm:text-sm text-stone-500 tracking-wider pt-2 block">- IYASAKA -</span>
             </button>
-            <nav className="hidden md:flex items-center space-x-6">
-                <button onClick={onHomeClick} className="text-stone-600 hover:text-green-700 font-medium transition-colors">イベントを探す</button>
-                <button onClick={onServiceListClick} className="text-stone-600 hover:text-green-700 font-medium transition-colors">サービスを探す</button>
+            <nav className="hidden md:flex items-center space-x-8">
+                <button onClick={onHomeClick} className="text-stone-600 hover:text-stone-900 font-medium tracking-wide transition-colors relative py-2 after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[1px] after:bg-stone-800 after:transition-all hover:after:w-full">イベント・マルシェを探す</button>
+                <button onClick={onServiceListClick} className="text-stone-600 hover:text-stone-900 font-medium tracking-wide transition-colors relative py-2 after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[1px] after:bg-stone-800 after:transition-all hover:after:w-full">サービスを探す</button>
             </nav>
           </div>
           <div className="flex items-center gap-2 sm:gap-4">
             {user ? (
               <>
-                <div className="hidden lg:flex items-center mr-2">
-                   <UserCircleIcon className="w-6 h-6 text-stone-500 mr-2"/>
-                   <span className="text-stone-700 font-medium truncate max-w-[150px]">{user.name}</span>
+                <div className="hidden lg:flex items-center mr-2 bg-stone-100 rounded-full px-4 py-1">
+                   <UserCircleIcon className="w-5 h-5 text-stone-500 mr-2"/>
+                   <span className="text-stone-700 font-medium truncate max-w-[150px] text-sm tracking-wide">{user.name} 様</span>
                 </div>
                 <button
                     onClick={onDashboardClick}
-                    className="flex items-center justify-center bg-stone-100 text-stone-700 p-2 sm:px-3 sm:py-2 rounded-lg hover:bg-stone-200 transition-colors duration-200"
-                    title="ダッシュボード"
+                    className="flex items-center justify-center text-stone-600 hover:text-stone-900 p-2 transition-colors duration-200"
+                    title="マイページ"
                 >
-                    <DashboardIcon className="w-5 h-5 sm:mr-2" />
-                    <span className="hidden sm:inline">ダッシュボード</span>
+                    <DashboardIcon className="w-6 h-6" />
                 </button>
                 {(user.role === UserRole.ADMIN || user.role === UserRole.PROVIDER) && (
                   <>
                     <button
                         onClick={onCreateServiceClick}
-                        className="flex items-center justify-center bg-blue-600 text-white p-2 sm:px-3 sm:py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200"
+                        className="flex items-center justify-center bg-indigo-800 text-white p-2 sm:px-4 sm:py-2 rounded shadow-sm hover:bg-indigo-900 transition-colors duration-200"
                         title="サービスを出品"
                     >
-                        <BriefcaseIcon className="w-5 h-5 sm:mr-2" />
-                        <span className="hidden sm:inline">サービスを出品</span>
+                        <BriefcaseIcon className="w-4 h-4 sm:mr-2" />
+                        <span className="hidden sm:inline text-sm tracking-wide">出品</span>
                     </button>
                     <button
                         onClick={onCreateEventClick}
-                        className="flex items-center justify-center bg-green-600 text-white p-2 sm:px-3 sm:py-2 rounded-lg hover:bg-green-700 transition-colors duration-200"
+                        className="flex items-center justify-center bg-teal-700 text-white p-2 sm:px-4 sm:py-2 rounded shadow-sm hover:bg-teal-800 transition-colors duration-200"
                         title="イベント作成"
                     >
-                        <PlusIcon className="w-5 h-5 sm:mr-2" />
-                        <span className="hidden sm:inline">イベント作成</span>
+                        <PlusIcon className="w-4 h-4 sm:mr-2" />
+                        <span className="hidden sm:inline text-sm tracking-wide">催し作成</span>
                     </button>
                   </>
                 )}
                 <button
                   onClick={onLogoutClick}
-                  className="flex items-center justify-center bg-stone-200 text-stone-800 p-2 sm:px-3 sm:py-2 rounded-lg hover:bg-stone-300 transition-colors duration-200"
+                  className="flex items-center justify-center text-stone-400 hover:text-red-700 p-2 transition-colors duration-200"
                   title="ログアウト"
                 >
-                  <LogoutIcon className="w-5 h-5 sm:mr-2" />
-                  <span className="hidden sm:inline">ログアウト</span>
+                  <LogoutIcon className="w-6 h-6" />
                 </button>
               </>
             ) : (
               <button
                 onClick={onLoginClick}
-                className="bg-green-600 text-white px-3 py-2 sm:px-4 rounded-lg hover:bg-green-700 transition-colors duration-200 text-sm sm:text-base whitespace-nowrap"
+                className="bg-stone-800 text-white px-5 py-2 rounded shadow-sm hover:bg-stone-700 transition-colors duration-200 text-sm font-medium tracking-wide"
               >
-                ログイン<span className="hidden sm:inline"> / 会員登録</span>
+                ログイン / 登録
               </button>
             )}
           </div>

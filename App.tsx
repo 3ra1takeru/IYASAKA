@@ -10,7 +10,7 @@ import { User, Event, Provider, EventReservation, UserRole, EventRegistration, R
 import ProviderDetailModal from './components/ProviderDetailModal';
 import EventRegistrationForm from './components/EventRegistrationForm';
 import EventProvidersModal from './components/EventProvidersModal';
-import { EditIcon, TrashIcon, InstagramIcon, StarIcon, ChatBubbleIcon, BriefcaseIcon, UserCircleIcon, QrcodeIcon } from './components/icons';
+import { EditIcon, TrashIcon, InstagramIcon, StarIcon, ChatBubbleIcon, BriefcaseIcon, UserCircleIcon, QrcodeIcon, CalendarIcon, StoreIcon, PlusIcon } from './components/icons';
 import ServiceCard from './components/ServiceCard';
 import ServiceForm from './components/ServiceForm';
 
@@ -99,8 +99,8 @@ const MOCK_REVIEWS: Review[] = [
 ];
 
 const MOCK_SERVICES: Service[] = [
-    { id: 'service1', providerId: 'provider3', title: 'あなたの未来を占うタロットリーディング', description: '恋愛、仕事、人間関係など、どんなお悩みでもご相談ください。タロットカードがあなたを導きます。', category: ServiceCategory.FORTUNE, price: 3000, imageUrl: 'https://picsum.photos/seed/tarot/400/300', deliveryMethod: 'online', status: 'open' },
-    { id: 'service2', providerId: 'provider1', title: 'オーダーメイドの記念日ブーケ', description: '誕生日や記念日に、世界で一つだけの特別なブーケをお作りします。色や花の種類などご希望をお聞かせください。', category: ServiceCategory.OTHER, price: 5000, imageUrl: 'https://picsum.photos/seed/bouquet/400/300', deliveryMethod: 'offline', status: 'open' },
+    { id: 'service1', providerId: 'provider3', title: 'あなたの未来を占うタロットリーディング', description: '恋愛、仕事、人間関係など、どんなお悩みでもご相談ください。タロットカードがあなたを導きます。', category: ServiceCategory.FORTUNE, price: 3000, imageUrl: 'https://picsum.photos/seed/tarot/400/300', deliveryMethod: 'online', location: '東京都', status: 'open' },
+    { id: 'service2', providerId: 'provider1', title: 'オーダーメイドの記念日ブーケ', description: '誕生日や記念日に、世界で一つだけの特別なブーケをお作りします。色や花の種類などご希望をお聞かせください。', category: ServiceCategory.OTHER, price: 5000, imageUrl: 'https://picsum.photos/seed/bouquet/400/300', deliveryMethod: 'offline', location: '神奈川県', status: 'open' },
 ];
 
 const MOCK_SERVICE_ORDERS: ServiceOrder[] = [
@@ -173,34 +173,39 @@ const ServiceDetailModal: React.FC<ServiceDetailModalProps> = ({ isOpen, onClose
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="サービス詳細">
       <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
-        <img src={service.imageUrl} alt={service.title} className="w-full h-56 object-cover rounded-lg" />
+        <img src={service.imageUrl} alt={service.title} className="w-full h-56 object-cover rounded shadow-sm border border-stone-100" />
         
-        <div>
-            <span className="text-sm font-semibold uppercase text-blue-600 bg-blue-100 px-2 py-1 rounded-full">{service.category}</span>
-            <h2 className="text-3xl font-bold text-stone-800 mt-2">{service.title}</h2>
+        <div className="flex justify-between items-start">
+            <div>
+                 <span className="text-xs font-serif font-medium tracking-wide text-indigo-800 bg-indigo-50 border border-indigo-100 px-3 py-1 rounded-sm">{service.category}</span>
+                 <h2 className="text-2xl font-bold text-stone-800 mt-3 font-serif tracking-wide">{service.title}</h2>
+            </div>
+            <div className="text-xs bg-stone-100 px-2 py-1 rounded text-stone-600 mt-1 whitespace-nowrap">
+                {service.location}
+            </div>
         </div>
 
-        <div className="flex items-center justify-between pt-4 border-t">
+        <div className="flex items-center justify-between pt-4 border-t border-stone-100">
              <div className="flex items-center text-md text-stone-700">
-                <img src={provider.profileImageUrl} alt={provider.providerName} className="w-10 h-10 rounded-full object-cover mr-3" />
-                <span className="font-semibold">{provider.providerName}</span>
+                <img src={provider.profileImageUrl} alt={provider.providerName} className="w-10 h-10 rounded-full object-cover mr-3 border border-stone-200" />
+                <span className="font-semibold text-sm">{provider.providerName}</span>
             </div>
-            <span className="text-2xl font-bold text-blue-800">&yen;{service.price.toLocaleString()}</span>
+            <span className="text-2xl font-bold text-teal-800 font-serif">&yen;{service.price.toLocaleString()}</span>
         </div>
         
-        <div className="space-y-2">
-            <h3 className="font-semibold text-stone-700">サービス内容</h3>
-            <p className="text-stone-600 whitespace-pre-wrap">{service.description}</p>
+        <div className="space-y-2 bg-stone-50 p-4 rounded border border-stone-100">
+            <h3 className="font-semibold text-stone-700 text-sm">サービス内容</h3>
+            <p className="text-stone-600 whitespace-pre-wrap text-sm leading-relaxed font-light">{service.description}</p>
         </div>
         <div className="space-y-2">
-            <h3 className="font-semibold text-stone-700">提供方法</h3>
-            <p className="text-stone-600 capitalize">{service.deliveryMethod === 'both' ? 'オンライン & 対面' : service.deliveryMethod}</p>
+            <h3 className="font-semibold text-stone-700 text-sm">提供方法</h3>
+            <p className="text-stone-600 capitalize text-sm">{service.deliveryMethod === 'both' ? 'オンライン & 対面' : service.deliveryMethod}</p>
         </div>
 
         {/* Reviews Section */}
-        <div className="pt-4 border-t">
+        <div className="pt-4 border-t border-stone-100">
             <div className="flex items-center gap-4 mb-3">
-                <h4 className="font-semibold text-stone-800 mb-0">口コミ ({serviceReviews.length}件)</h4>
+                <h4 className="font-semibold text-stone-800 mb-0 text-sm">口コミ ({serviceReviews.length}件)</h4>
                 {serviceReviews.length > 0 && (
                     <div className="flex items-center gap-2">
                         <StarRatingDisplay rating={averageRating} />
@@ -214,16 +219,16 @@ const ServiceDetailModal: React.FC<ServiceDetailModalProps> = ({ isOpen, onClose
                     {serviceReviews.map(review => {
                         const reviewer = users.find(u => u.id === review.userId);
                         return (
-                        <div key={review.id} className="bg-stone-50 p-3 rounded-md">
+                        <div key={review.id} className="bg-stone-50 p-3 rounded border border-stone-100">
                             <div className="flex items-center justify-between mb-1">
                                 <div className="flex items-center gap-2">
-                                    <UserCircleIcon className="w-5 h-5 text-stone-400"/>
-                                    <p className="font-semibold text-sm text-stone-700">{reviewer?.name || '匿名ユーザー'}</p>
+                                    <UserCircleIcon className="w-4 h-4 text-stone-400"/>
+                                    <p className="font-semibold text-xs text-stone-700">{reviewer?.name || '匿名ユーザー'}</p>
                                 </div>
-                                <StarRatingDisplay rating={review.rating} className="w-4 h-4"/>
+                                <StarRatingDisplay rating={review.rating} className="w-3 h-3"/>
                             </div>
-                            <p className="text-stone-600 text-sm">{review.comment}</p>
-                            <p className="text-right text-xs text-stone-400 mt-1">{review.createdAt}</p>
+                            <p className="text-stone-600 text-sm font-light">{review.comment}</p>
+                            <p className="text-right text-xs text-stone-400 mt-1 font-serif">{review.createdAt}</p>
                         </div>
                         )
                     })}
@@ -235,16 +240,16 @@ const ServiceDetailModal: React.FC<ServiceDetailModalProps> = ({ isOpen, onClose
 
         {/* Review Form Section */}
         {canPostReview && (
-            <div className="pt-4 border-t">
-                 <h4 className="font-semibold text-stone-800 mb-2">このサービスの口コミを投稿する</h4>
+            <div className="pt-4 border-t border-stone-100">
+                 <h4 className="font-semibold text-stone-800 mb-2 text-sm">このサービスの口コミを投稿する</h4>
                  <div className="space-y-3">
                     <div>
-                        <label className="text-sm font-medium text-stone-600">評価</label>
+                        <label className="text-xs font-medium text-stone-600">評価</label>
                         <div className="flex items-center mt-1">
                             {[...Array(5)].map((_, i) => (
                             <button key={i} onClick={() => setNewRating(i + 1)} onMouseOver={() => setHoverRating(i+1)} onMouseOut={() => setHoverRating(0)}>
                                 <StarIcon 
-                                    className={`w-7 h-7 cursor-pointer transition-colors ${(hoverRating || newRating) > i ? 'text-yellow-400' : 'text-stone-300'}`} 
+                                    className={`w-6 h-6 cursor-pointer transition-colors ${(hoverRating || newRating) > i ? 'text-yellow-400' : 'text-stone-300'}`} 
                                     filled={(hoverRating || newRating) > i}
                                 />
                             </button>
@@ -252,34 +257,34 @@ const ServiceDetailModal: React.FC<ServiceDetailModalProps> = ({ isOpen, onClose
                         </div>
                     </div>
                      <div>
-                        <label className="text-sm font-medium text-stone-600">コメント</label>
+                        <label className="text-xs font-medium text-stone-600">コメント</label>
                         <textarea 
                             value={newComment} 
                             onChange={e => setNewComment(e.target.value)} 
                             rows={3} 
                             placeholder="サービスの感想を教えてください"
-                            className="mt-1 block w-full px-3 py-2 bg-white border border-stone-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            className="mt-1 block w-full px-3 py-2 bg-white border border-stone-300 rounded shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500 text-sm"
                         />
                     </div>
                     <div className="text-right">
-                        <button onClick={handleAddReview} disabled={!newRating || !newComment.trim()} className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:bg-stone-300">投稿する</button>
+                        <button onClick={handleAddReview} disabled={!newRating || !newComment.trim()} className="bg-indigo-700 text-white px-4 py-2 rounded hover:bg-indigo-800 disabled:bg-stone-300 text-sm tracking-wide transition-colors">投稿する</button>
                     </div>
-                 </div>
+                         </div>
             </div>
         )}
 
 
-        <div className="pt-4 border-t">
+        <div className="pt-4 border-t border-stone-100">
             {canRequest ? (
                 <button 
                     onClick={() => onRequestService(service.id)}
-                    className="w-full bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center font-bold text-lg"
+                    className="w-full bg-teal-700 text-white px-4 py-3 rounded hover:bg-teal-800 transition-colors flex items-center justify-center font-bold text-lg tracking-wide shadow-sm"
                 >
-                    <BriefcaseIcon className="w-6 h-6 mr-2" />
+                    <BriefcaseIcon className="w-5 h-5 mr-2" />
                     このサービスについて相談する
                 </button>
             ) : (
-                <div className="text-center p-3 bg-stone-100 rounded-md text-stone-600">
+                <div className="text-center p-3 bg-stone-100 rounded text-stone-600 text-sm">
                     {currentUser?.id === service.providerId 
                         ? "ご自身のサービスです。"
                         : "サービスに申し込むには会員としてログインしてください。"
@@ -295,18 +300,18 @@ const ServiceDetailModal: React.FC<ServiceDetailModalProps> = ({ isOpen, onClose
 
 const renderServiceStatus = (status: ServiceOrder['status']) => {
     const styles = {
-        requested: "bg-yellow-100 text-yellow-800",
-        accepted: "bg-blue-100 text-blue-800",
-        completed: "bg-green-100 text-green-800",
-        cancelled: "bg-stone-200 text-stone-700",
+        requested: "bg-yellow-50 text-yellow-800 border-yellow-200",
+        accepted: "bg-indigo-50 text-indigo-800 border-indigo-200",
+        completed: "bg-teal-50 text-teal-800 border-teal-200",
+        cancelled: "bg-stone-200 text-stone-700 border-stone-300",
     };
     const text = {
-        requested: "リクエスト中",
+        requested: "承認待ち",
         accepted: "進行中",
         completed: "完了",
-        cancelled: "キャンセル",
+        cancelled: "取消",
     };
-    return <span className={`px-2 py-1 text-xs font-medium rounded-full ${styles[status]}`}>{text[status]}</span>;
+    return <span className={`px-2 py-0.5 text-xs font-medium rounded border ${styles[status]}`}>{text[status]}</span>;
 }
 
 interface ChatSession {
@@ -357,23 +362,23 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, session, current
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={`${otherUserName}とのメッセージ`}>
       <div className="flex flex-col h-[60vh]">
-        <div className="bg-stone-100 p-2 text-sm text-stone-600 mb-2 rounded-md text-center">
-            <span className="font-semibold">{session.title}</span> に関するメッセージ
+        <div className="bg-stone-100 p-2 text-sm text-stone-600 mb-2 rounded-sm text-center border border-stone-200">
+            <span className="font-semibold">{session.title}</span> に関する連絡
         </div>
-        <div className="flex-grow overflow-y-auto p-4 bg-stone-50 rounded-md space-y-4">
+        <div className="flex-grow overflow-y-auto p-4 bg-[#fcfcf9] rounded border border-stone-200 space-y-4">
           {messages.length > 0 ? messages.map(msg => {
             const isMyMessage = msg.senderId === currentUser.id;
             return (
               <div key={msg.id} className={`flex items-end gap-2 ${isMyMessage ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-xs md:max-w-md p-3 rounded-lg ${isMyMessage ? 'bg-blue-500 text-white rounded-br-none' : 'bg-white text-stone-700 rounded-bl-none border'}`}>
+                <div className={`max-w-xs md:max-w-md p-3 rounded-lg ${isMyMessage ? 'bg-indigo-600 text-white rounded-br-none' : 'bg-white text-stone-700 rounded-bl-none border border-stone-200 shadow-sm'}`}>
                   <p className="text-sm">{msg.message}</p>
-                  <p className={`text-xs mt-1 ${isMyMessage ? 'text-blue-100' : 'text-stone-400'} text-right`}>
+                  <p className={`text-xs mt-1 ${isMyMessage ? 'text-indigo-200' : 'text-stone-400'} text-right`}>
                     {new Date(msg.createdAt).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}
                   </p>
                 </div>
               </div>
             )
-          }) : <p className="text-center text-stone-500">まだメッセージはありません。</p>}
+          }) : <p className="text-center text-stone-500 text-sm">まだメッセージはありません。</p>}
           <div ref={chatEndRef} />
         </div>
         <form onSubmit={handleSubmit} className="mt-4 flex gap-2">
@@ -382,9 +387,9 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, session, current
             value={newMessage}
             onChange={e => setNewMessage(e.target.value)}
             placeholder="メッセージを入力..."
-            className="flex-grow block w-full px-3 py-2 bg-white border border-stone-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            className="flex-grow block w-full px-3 py-2 bg-white border border-stone-300 rounded shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500"
           />
-          <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:bg-blue-300" disabled={!newMessage.trim()}>送信</button>
+          <button type="submit" className="bg-teal-700 text-white px-4 py-2 rounded hover:bg-teal-800 disabled:bg-stone-300 transition-colors" disabled={!newMessage.trim()}>送信</button>
         </form>
       </div>
     </Modal>
@@ -410,13 +415,13 @@ const QRCodeModal: React.FC<QRCodeModalProps> = ({ isOpen, onClose, data, title 
         <Modal isOpen={isOpen} onClose={onClose} title={title}>
             <div className="flex flex-col items-center space-y-4 p-4">
                 <p className="text-sm text-stone-600 text-center">受付でこのQRコードを提示してください。</p>
-                <div className="border-4 border-stone-200 rounded-xl p-2 bg-white">
+                <div className="border-4 border-stone-100 rounded-xl p-2 bg-white">
                     <img src={qrUrl} alt="QR Code" className="w-64 h-64" />
                 </div>
-                <div className="text-xs text-stone-400 break-all text-center max-w-[250px]">
+                <div className="text-xs text-stone-400 break-all text-center max-w-[250px] font-mono">
                     ID: {data}
                 </div>
-                <button onClick={onClose} className="w-full bg-stone-200 text-stone-800 py-2 rounded-lg hover:bg-stone-300">閉じる</button>
+                <button onClick={onClose} className="w-full bg-stone-200 text-stone-800 py-2 rounded hover:bg-stone-300 transition-colors">閉じる</button>
             </div>
         </Modal>
     );
@@ -445,7 +450,7 @@ const ScanModal: React.FC<ScanModalProps> = ({ isOpen, onClose, onScan }) => {
     return (
         <Modal isOpen={isOpen} onClose={onClose} title="QR受付スキャン">
             <div className="space-y-6 p-2">
-                <div className="bg-stone-900 h-48 rounded-lg flex items-center justify-center text-stone-400 flex-col">
+                <div className="bg-stone-900 h-48 rounded flex items-center justify-center text-stone-400 flex-col">
                     <QrcodeIcon className="w-12 h-12 mb-2"/>
                     <p className="text-sm">カメラを起動中... (シミュレーション)</p>
                 </div>
@@ -458,9 +463,9 @@ const ScanModal: React.FC<ScanModalProps> = ({ isOpen, onClose, onScan }) => {
                             value={ticketIdInput}
                             onChange={e => setTicketIdInput(e.target.value)}
                             placeholder="ticket-event-user"
-                            className="flex-grow p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                            className="flex-grow p-2 border border-stone-300 rounded focus:outline-none focus:ring-2 focus:ring-teal-500"
                         />
-                        <button type="submit" className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">確認</button>
+                        <button type="submit" className="bg-teal-700 text-white px-4 py-2 rounded hover:bg-teal-800 transition-colors">確認</button>
                     </form>
                 </div>
             </div>
@@ -507,6 +512,7 @@ const App: React.FC = () => {
   const [qrData, setQrData] = useState<{data: string, title: string} | null>(null);
   
   const [isScanModalOpen, setScanModalOpen] = useState(false);
+  const [searchType, setSearchType] = useState<'events' | 'services'>('events');
 
   const receivedBookings = currentUser ? timeSlotBookings.filter(b => b.providerId === currentUser.id) : [];
 
@@ -846,8 +852,7 @@ const App: React.FC = () => {
 
   const HomePage = () => {
     const [isFilterOpen, setIsFilterOpen] = useState(false);
-    const [searchType, setSearchType] = useState<'events' | 'services'>('events');
-
+    
     // Event filters
     const [eventSearchFilters, setEventSearchFilters] = useState({
       startDate: '',
@@ -904,6 +909,7 @@ const App: React.FC = () => {
         category: '',
         maxPrice: '',
         deliveryMethod: '',
+        prefecture: '', // Added prefecture filter state
     });
 
     const handleServiceFilterChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -917,45 +923,51 @@ const App: React.FC = () => {
             category: '',
             maxPrice: '',
             deliveryMethod: '',
+            prefecture: '',
         });
     };
 
     const filteredServices = services.filter(service => {
-        const { keyword, category, maxPrice, deliveryMethod } = serviceSearchFilters;
+        const { keyword, category, maxPrice, deliveryMethod, prefecture } = serviceSearchFilters;
         const lowerKeyword = keyword.toLowerCase();
 
         const keywordMatch = !keyword || service.title.toLowerCase().includes(lowerKeyword) || service.description.toLowerCase().includes(lowerKeyword);
         const categoryMatch = !category || service.category === category;
         const priceMatch = !maxPrice || service.price <= parseInt(maxPrice, 10);
         const deliveryMatch = !deliveryMethod || service.deliveryMethod === deliveryMethod || service.deliveryMethod === 'both';
+        // Check prefecture match if selected
+        const prefectureMatch = !prefecture || service.location.includes(prefecture);
         
-        return keywordMatch && categoryMatch && priceMatch && deliveryMatch;
+        return keywordMatch && categoryMatch && priceMatch && deliveryMatch && prefectureMatch;
     });
 
     return (
         <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div className="text-center mb-12">
-                <h1 className="text-4xl md:text-5xl font-extrabold text-green-800">幸せが広がる、ご縁結び</h1>
-                <p className="mt-4 text-lg text-stone-600 max-w-2xl mx-auto">想いが詰まった出会いを、特別な空間でお楽しみください。</p>
+            <div className="text-center mb-16 mt-8">
+                <h1 className="text-4xl md:text-5xl font-bold text-stone-800 tracking-[0.2em] font-serif leading-tight">幸せが広がる、<br className="md:hidden"/>ご縁結び</h1>
+                <p className="mt-6 text-lg text-stone-600 max-w-2xl mx-auto font-light tracking-wide">想いが詰まった出会いを、<br/>特別な空間でお楽しみください。</p>
+                <div className="mt-8 flex justify-center">
+                    <div className="w-16 h-1 bg-teal-800 opacity-50"></div>
+                </div>
             </div>
             
-            <div className="bg-white rounded-lg shadow-md mb-12 overflow-hidden">
+            <div className="bg-white rounded shadow-sm border border-stone-200 mb-12 overflow-hidden">
                 <div className="flex border-b border-stone-200">
                     <button 
                         onClick={() => { setSearchType('events'); setIsFilterOpen(false); }} 
-                        className={`flex-1 py-4 text-center font-bold text-lg transition-colors ${searchType === 'events' ? 'text-green-700 border-b-2 border-green-600 bg-green-50' : 'text-stone-500 hover:bg-stone-50'}`}
+                        className={`flex-1 py-5 text-center font-bold text-lg transition-all tracking-widest ${searchType === 'events' ? 'text-teal-800 border-b-2 border-teal-800 bg-teal-50/50' : 'text-stone-400 hover:text-stone-600 hover:bg-stone-50'}`}
                     >
-                        イベントを探す
+                        イベント・マルシェを探す
                     </button>
                     <button 
                         onClick={() => { setSearchType('services'); setIsFilterOpen(false); }} 
-                        className={`flex-1 py-4 text-center font-bold text-lg transition-colors ${searchType === 'services' ? 'text-blue-700 border-b-2 border-blue-600 bg-blue-50' : 'text-stone-500 hover:bg-stone-50'}`}
+                        className={`flex-1 py-5 text-center font-bold text-lg transition-all tracking-widest ${searchType === 'services' ? 'text-indigo-800 border-b-2 border-indigo-800 bg-indigo-50/50' : 'text-stone-400 hover:text-stone-600 hover:bg-stone-50'}`}
                     >
                         サービスを探す
                     </button>
                 </div>
                 
-                <div className="p-6">
+                <div className="p-8">
                     {/* Keyword Input Area */}
                     <div className="flex flex-col md:flex-row gap-4">
                         <div className="flex-grow relative">
@@ -970,14 +982,14 @@ const App: React.FC = () => {
                                 value={searchType === 'events' ? eventSearchFilters.keyword : serviceSearchFilters.keyword}
                                 onChange={searchType === 'events' ? handleEventFilterChange : handleServiceFilterChange}
                                 placeholder={searchType === 'events' ? "イベント名、キーワードで検索..." : "サービス名、キーワードで検索..."}
-                                className="block w-full pl-10 pr-3 py-3 border border-stone-300 rounded-lg leading-5 bg-white placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 sm:text-sm transition-shadow"
+                                className="block w-full pl-10 pr-3 py-3 border border-stone-300 rounded leading-5 bg-stone-50 placeholder-stone-400 focus:outline-none focus:ring-1 focus:ring-teal-500 focus:border-teal-500 transition-shadow font-light"
                             />
                         </div>
                         <button
                             onClick={() => setIsFilterOpen(!isFilterOpen)}
-                            className={`flex items-center justify-center px-6 py-3 border border-stone-300 rounded-lg text-sm font-medium transition-colors ${isFilterOpen ? 'bg-stone-100 text-stone-900' : 'bg-white text-stone-700 hover:bg-stone-50'}`}
+                            className={`flex items-center justify-center px-6 py-3 border border-stone-300 rounded text-sm font-medium transition-colors tracking-wide ${isFilterOpen ? 'bg-stone-200 text-stone-900' : 'bg-white text-stone-700 hover:bg-stone-100'}`}
                         >
-                            <span className="mr-2">絞り込み条件</span>
+                            <span className="mr-2">絞り込み</span>
                             <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 transition-transform duration-200 ${isFilterOpen ? 'transform rotate-180' : ''}`} viewBox="0 0 20 20" fill="currentColor">
                                 <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
                             </svg>
@@ -991,16 +1003,16 @@ const App: React.FC = () => {
                                 <div className="space-y-4">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
-                                            <label className="block text-sm font-medium text-stone-700 mb-1">期間</label>
+                                            <label className="block text-sm font-medium text-stone-700 mb-1 tracking-wide">期間</label>
                                             <div className="flex items-center space-x-2">
-                                                <input type="date" name="startDate" value={eventSearchFilters.startDate} onChange={handleEventFilterChange} className="block w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500"/>
+                                                <input type="date" name="startDate" value={eventSearchFilters.startDate} onChange={handleEventFilterChange} className="block w-full px-3 py-2 bg-white border border-stone-300 rounded focus:outline-none focus:ring-1 focus:ring-teal-500"/>
                                                 <span className="text-stone-400">〜</span>
-                                                <input type="date" name="endDate" value={eventSearchFilters.endDate} onChange={handleEventFilterChange} className="block w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500"/>
+                                                <input type="date" name="endDate" value={eventSearchFilters.endDate} onChange={handleEventFilterChange} className="block w-full px-3 py-2 bg-white border border-stone-300 rounded focus:outline-none focus:ring-1 focus:ring-teal-500"/>
                                             </div>
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-stone-700 mb-1">都道府県</label>
-                                            <select name="prefecture" value={eventSearchFilters.prefecture} onChange={handleEventFilterChange} className="block w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500">
+                                            <label className="block text-sm font-medium text-stone-700 mb-1 tracking-wide">都道府県</label>
+                                            <select name="prefecture" value={eventSearchFilters.prefecture} onChange={handleEventFilterChange} className="block w-full px-3 py-2 bg-white border border-stone-300 rounded focus:outline-none focus:ring-1 focus:ring-teal-500">
                                                 <option value="">すべて</option>
                                                 {PREFECTURES.map(p => <option key={p} value={p}>{p}</option>)}
                                             </select>
@@ -1008,42 +1020,49 @@ const App: React.FC = () => {
                                     </div>
                                     <div className="flex items-center justify-between">
                                         <label className="flex items-center space-x-2 cursor-pointer">
-                                            <input type="checkbox" name="includePast" checked={eventSearchFilters.includePast} onChange={handleEventFilterChange} className="h-4 w-4 text-green-600 border-stone-300 rounded focus:ring-green-500"/>
+                                            <input type="checkbox" name="includePast" checked={eventSearchFilters.includePast} onChange={handleEventFilterChange} className="h-4 w-4 text-teal-700 border-stone-300 rounded focus:ring-teal-500"/>
                                             <span className="text-sm text-stone-700">過去のイベントを含める</span>
                                         </label>
-                                        <button onClick={resetEventFilters} className="text-sm text-stone-500 hover:text-red-500 underline">条件をクリア</button>
+                                        <button onClick={resetEventFilters} className="text-sm text-stone-500 hover:text-red-700 underline">条件をクリア</button>
                                     </div>
                                 </div>
                             )}
 
                             {searchType === 'services' && (
                                 <div className="space-y-4">
-                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                                         <div>
-                                            <label className="block text-sm font-medium text-stone-700 mb-1">カテゴリ</label>
-                                            <select name="category" value={serviceSearchFilters.category} onChange={handleServiceFilterChange} className="block w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500">
+                                            <label className="block text-sm font-medium text-stone-700 mb-1 tracking-wide">カテゴリ</label>
+                                            <select name="category" value={serviceSearchFilters.category} onChange={handleServiceFilterChange} className="block w-full px-3 py-2 bg-white border border-stone-300 rounded focus:outline-none focus:ring-1 focus:ring-indigo-500">
                                                 <option value="">すべて</option>
                                                 {Object.values(ServiceCategory).map(c => <option key={c} value={c}>{c}</option>)}
                                             </select>
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-stone-700 mb-1">上限価格</label>
+                                            <label className="block text-sm font-medium text-stone-700 mb-1 tracking-wide">都道府県</label>
+                                            <select name="prefecture" value={serviceSearchFilters.prefecture} onChange={handleServiceFilterChange} className="block w-full px-3 py-2 bg-white border border-stone-300 rounded focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                                <option value="">すべて</option>
+                                                {PREFECTURES.map(p => <option key={p} value={p}>{p}</option>)}
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-stone-700 mb-1 tracking-wide">上限価格</label>
                                             <div className="relative">
                                                 <span className="absolute left-3 top-2 text-stone-500">¥</span>
-                                                <input type="number" name="maxPrice" value={serviceSearchFilters.maxPrice} onChange={handleServiceFilterChange} placeholder="例: 5000" min="0" className="block w-full pl-8 pr-3 py-2 bg-stone-50 border border-stone-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"/>
+                                                <input type="number" name="maxPrice" value={serviceSearchFilters.maxPrice} onChange={handleServiceFilterChange} placeholder="例: 5000" min="0" className="block w-full pl-8 pr-3 py-2 bg-white border border-stone-300 rounded focus:outline-none focus:ring-1 focus:ring-indigo-500"/>
                                             </div>
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-stone-700 mb-1">提供方法</label>
+                                            <label className="block text-sm font-medium text-stone-700 mb-1 tracking-wide">提供方法</label>
                                             <div className="flex items-center space-x-4 mt-2">
-                                                <label className="flex items-center"><input type="radio" name="deliveryMethod" value="" checked={serviceSearchFilters.deliveryMethod === ''} onChange={handleServiceFilterChange} className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-stone-300"/> <span className="ml-2 text-sm">すべて</span></label>
-                                                <label className="flex items-center"><input type="radio" name="deliveryMethod" value="online" checked={serviceSearchFilters.deliveryMethod === 'online'} onChange={handleServiceFilterChange} className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-stone-300"/> <span className="ml-2 text-sm">オンライン</span></label>
-                                                <label className="flex items-center"><input type="radio" name="deliveryMethod" value="offline" checked={serviceSearchFilters.deliveryMethod === 'offline'} onChange={handleServiceFilterChange} className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-stone-300"/> <span className="ml-2 text-sm">対面</span></label>
+                                                <label className="flex items-center"><input type="radio" name="deliveryMethod" value="" checked={serviceSearchFilters.deliveryMethod === ''} onChange={handleServiceFilterChange} className="h-4 w-4 text-indigo-700 focus:ring-indigo-500 border-stone-300"/> <span className="ml-2 text-sm">すべて</span></label>
+                                                <label className="flex items-center"><input type="radio" name="deliveryMethod" value="online" checked={serviceSearchFilters.deliveryMethod === 'online'} onChange={handleServiceFilterChange} className="h-4 w-4 text-indigo-700 focus:ring-indigo-500 border-stone-300"/> <span className="ml-2 text-sm">オンライン</span></label>
+                                                <label className="flex items-center"><input type="radio" name="deliveryMethod" value="offline" checked={serviceSearchFilters.deliveryMethod === 'offline'} onChange={handleServiceFilterChange} className="h-4 w-4 text-indigo-700 focus:ring-indigo-500 border-stone-300"/> <span className="ml-2 text-sm">対面</span></label>
                                             </div>
                                         </div>
                                     </div>
                                     <div className="flex justify-end">
-                                        <button onClick={resetServiceFilters} className="text-sm text-stone-500 hover:text-red-500 underline">条件をクリア</button>
+                                        <button onClick={resetServiceFilters} className="text-sm text-stone-500 hover:text-red-700 underline">条件をクリア</button>
                                     </div>
                                 </div>
                             )}
@@ -1053,20 +1072,20 @@ const App: React.FC = () => {
             </div>
 
             <div className="mb-12">
-                <h2 className="text-3xl font-bold text-stone-800 mb-6">注目のサービス</h2>
+                <h2 className="text-3xl font-bold text-stone-800 mb-8 border-l-4 border-indigo-800 pl-4 py-1 font-serif tracking-widest">注目のサービス</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {services.slice(0, 3).map(service => (
                         <ServiceCard key={service.id} service={service} provider={providers.find(p => p.id === service.providerId)!} onSelect={handleSelectService}/>
                     ))}
                 </div>
-                 <div className="text-center mt-6">
-                    <button onClick={() => setView('serviceList')} className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors">すべてのサービスを見る</button>
+                 <div className="text-center mt-8">
+                    <button onClick={() => { setView('home'); setSearchType('services'); }} className="bg-white border border-stone-300 text-stone-600 px-8 py-3 rounded hover:bg-stone-50 transition-colors tracking-widest text-sm font-medium">すべてのサービスを見る</button>
                 </div>
             </div>
             
             {searchType === 'events' && (
                 <>
-                    <h2 className="text-3xl font-bold text-stone-800 mb-6 border-t pt-12">イベント一覧</h2>
+                    <h2 className="text-3xl font-bold text-stone-800 mb-8 border-l-4 border-teal-800 pl-4 py-1 font-serif tracking-widest pt-12">イベント・マルシェ一覧</h2>
                     {filteredEvents.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                             {filteredEvents.map((event) => (
@@ -1082,9 +1101,9 @@ const App: React.FC = () => {
                             ))}
                         </div>
                     ) : (
-                        <div className="text-center py-12 bg-white rounded-lg shadow-md">
-                            <h3 className="text-2xl font-semibold text-stone-700">お探しのイベントは見つかりませんでした</h3>
-                            <p className="text-stone-500 mt-2">検索条件を変更して、もう一度お試しください。</p>
+                        <div className="text-center py-12 bg-white rounded border border-stone-200">
+                            <h3 className="text-xl font-medium text-stone-700">お探しのイベントは見つかりませんでした</h3>
+                            <p className="text-stone-500 mt-2 font-light">検索条件を変更して、もう一度お試しください。</p>
                         </div>
                     )}
                 </>
@@ -1092,7 +1111,7 @@ const App: React.FC = () => {
 
             {searchType === 'services' && (
                 <>
-                    <h2 className="text-3xl font-bold text-stone-800 mb-6 border-t pt-12">サービス検索結果</h2>
+                    <h2 className="text-3xl font-bold text-stone-800 mb-8 border-l-4 border-indigo-800 pl-4 py-1 font-serif tracking-widest pt-12">検索結果</h2>
                     {filteredServices.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                             {filteredServices.map((service) => (
@@ -1104,9 +1123,9 @@ const App: React.FC = () => {
                             ))}
                         </div>
                     ) : (
-                        <div className="text-center py-12 bg-white rounded-lg shadow-md">
-                            <h3 className="text-2xl font-semibold text-stone-700">お探しのサービスは見つかりませんでした</h3>
-                            <p className="text-stone-500 mt-2">検索条件を変更して、もう一度お試しください。</p>
+                        <div className="text-center py-12 bg-white rounded border border-stone-200">
+                            <h3 className="text-xl font-medium text-stone-700">お探しのサービスは見つかりませんでした</h3>
+                            <p className="text-stone-500 mt-2 font-light">検索条件を変更して、もう一度お試しください。</p>
                         </div>
                     )}
                 </>
@@ -1114,329 +1133,300 @@ const App: React.FC = () => {
         </main>
     );
   };
-  
-  const ServiceListPage = () => {
-    return (
-        <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <h1 className="text-3xl font-bold text-stone-800 mb-8">サービスを探す</h1>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {services.map(service => (
-                    <ServiceCard key={service.id} service={service} provider={providers.find(p => p.id === service.providerId)!} onSelect={handleSelectService} />
-                ))}
-            </div>
-        </main>
-    );
-  };
 
   const DashboardPage = () => {
-    if (!currentUser) return <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">ログインしてください。</main>;
+    if (!currentUser) return <div className="p-8 text-center text-stone-500">ログインしてください</div>;
 
     const myEventReservations = eventReservations.filter(r => r.userId === currentUser.id);
-    const myEventRegistrations = eventRegistrations.filter(r => r.providerId === currentUser.id);
-    const myTimeSlotBookings = timeSlotBookings.filter(b => b.userId === currentUser.id);
-    const myFavoriteProviders = favorites.filter(f => f.userId === currentUser.id);
-    const myServiceOrders = serviceOrders.filter(o => o.buyerId === currentUser.id);
-    const receivedServiceOrders = serviceOrders.filter(o => o.providerId === currentUser.id);
-
-    const registrationStatusText = {
-        [RegistrationStatus.DRAFT]: { text: '下書き', color: 'bg-yellow-100 text-yellow-800' },
-        [RegistrationStatus.SUBMITTED]: { text: '申請中', color: 'bg-blue-100 text-blue-800' },
-        [RegistrationStatus.APPROVED]: { text: '承認済', color: 'bg-green-100 text-green-800' },
-    };
+    const myServiceOrdersAsBuyer = serviceOrders.filter(o => o.buyerId === currentUser.id);
+    const myBookingsAsBuyer = timeSlotBookings.filter(b => b.userId === currentUser.id);
+    
+    const myRegistrations = eventRegistrations.filter(r => r.providerId === currentUser.id);
+    const myServices = services.filter(s => s.providerId === currentUser.id);
+    const myReceivedServiceOrders = serviceOrders.filter(o => o.providerId === currentUser.id);
 
     return (
-        <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <h1 className="text-3xl font-bold text-stone-800 mb-8">ダッシュボード</h1>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="lg:col-span-2 space-y-8">
-                    {/* Member Dashboard */}
-                    {currentUser.role === UserRole.MEMBER && (
-                        <>
-                            <div className="bg-white p-6 rounded-lg shadow-md">
-                                <h2 className="text-xl font-bold text-stone-700 mb-4">予約したイベント</h2>
-                                {myEventReservations.length > 0 ? (
-                                    <ul className="space-y-3">
-                                        {myEventReservations.map(res => {
-                                            const event = events.find(e => e.id === res.eventId);
-                                            return event ? (
-                                                <li key={res.eventId} className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-3 bg-stone-50 rounded-md gap-3">
-                                                    <div>
-                                                        <p className="font-semibold">{event.name}</p>
-                                                        <p className="text-sm text-stone-500">{event.date} @ {event.location}</p>
-                                                    </div>
-                                                    <div className="flex gap-2">
-                                                        <button 
-                                                            onClick={() => handleShowQR(event.name, `ticket-${event.id}-${currentUser.id}`)}
-                                                            className="flex items-center text-sm bg-stone-800 text-white px-3 py-2 rounded-md hover:bg-stone-900 transition-colors"
-                                                        >
-                                                            <QrcodeIcon className="w-4 h-4 mr-1.5"/>
-                                                            チケットを表示
-                                                        </button>
-                                                        <button onClick={() => handleCancelEventReservation(event.id)} className="text-sm text-red-600 hover:text-red-800 border border-red-200 px-3 py-2 rounded-md hover:bg-red-50">キャンセル</button>
-                                                    </div>
-                                                </li>
-                                            ) : null;
-                                        })}
-                                    </ul>
-                                ) : <p className="text-stone-500">予約したイベントはありません。</p>}
-                            </div>
-                            <div className="bg-white p-6 rounded-lg shadow-md">
-                                <h2 className="text-xl font-bold text-stone-700 mb-4">予約した時間枠</h2>
-                                 {myTimeSlotBookings.length > 0 ? (
-                                    <ul className="space-y-3">
-                                        {myTimeSlotBookings.map(booking => {
-                                            const provider = providers.find(p => p.id === booking.providerId);
-                                            const event = events.find(e => e.id === booking.eventId);
-                                            const registration = eventRegistrations.find(r => r.providerId === booking.providerId && r.eventId === booking.eventId);
-                                            const timeSlot = registration?.timeSlots.find(ts => ts.id === booking.timeSlotId);
-                                            return (provider && event && timeSlot) ? (
-                                                <li key={booking.id} className="p-3 bg-stone-50 rounded-md">
-                                                    <div className="flex justify-between items-center">
-                                                        <div>
-                                                            <p className="font-semibold">{provider.providerName} - {timeSlot.startTime}~{timeSlot.endTime}</p>
-                                                            <p className="text-sm text-stone-500">{event.name} ({event.date})</p>
-                                                        </div>
-                                                        <div className="flex items-center gap-2">
-                                                            <span className={`text-xs font-medium px-2 py-1 rounded-full ${booking.bookingType === 'online' ? 'bg-cyan-100 text-cyan-800' : 'bg-green-100 text-green-800'}`}>
-                                                              {booking.bookingType}予約
-                                                            </span>
-                                                            <button onClick={() => handleOpenChat({
-                                                                id: booking.id,
-                                                                providerId: booking.providerId,
-                                                                buyerId: booking.userId,
-                                                                title: `${event.name} (${timeSlot.startTime}~)`
-                                                            })} className="text-blue-600 hover:text-blue-800 p-1" title="メッセージを送る">
-                                                                <ChatBubbleIcon className="w-5 h-5"/>
-                                                            </button>
-                                                            <button onClick={() => handleCancelTimeSlotBooking(booking.id)} className="text-sm text-red-600 hover:text-red-800 ml-2">キャンセル</button>
-                                                        </div>
-                                                    </div>
-                                                </li>
-                                            ) : null;
-                                        })}
-                                    </ul>
-                                ) : <p className="text-stone-500">予約した時間枠はありません。</p>}
-                            </div>
-                             <div className="bg-white p-6 rounded-lg shadow-md">
-                                <h2 className="text-xl font-bold text-stone-700 mb-4">購入したサービス</h2>
-                                {myServiceOrders.length > 0 ? (
-                                    <ul className="space-y-3">
-                                        {myServiceOrders.map(order => {
-                                            const service = services.find(s => s.id === order.serviceId);
-                                            const provider = providers.find(p => p.id === order.providerId);
-                                            const canReview = order.status === 'completed' && !serviceReviews.some(r => r.serviceId === order.serviceId && r.userId === currentUser.id);
-                                            return (service && provider) ? (
-                                                <li key={order.id} className="p-3 bg-stone-50 rounded-md">
-                                                    <div className="flex justify-between items-start">
-                                                        <div>
-                                                            <p className="font-semibold">{service.title}</p>
-                                                            <p className="text-sm text-stone-500">提供者: {provider.providerName}</p>
-                                                            <p className="text-xs text-stone-400">依頼日: {order.createdAt}</p>
-                                                        </div>
-                                                        <div className="flex items-center gap-4">
-                                                            {renderServiceStatus(order.status)}
-                                                            <button onClick={() => handleOpenChat({
-                                                                id: order.id,
-                                                                providerId: order.providerId,
-                                                                buyerId: order.buyerId,
-                                                                title: service.title
-                                                            })} className="text-blue-600 hover:text-blue-800" title="メッセージを送る">
-                                                                <ChatBubbleIcon className="w-5 h-5"/>
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                    {canReview && (
-                                                        <div className="text-right mt-2">
-                                                            <button onClick={() => handleSelectService(service)} className="text-sm bg-yellow-400 text-yellow-900 px-3 py-1 rounded-md hover:bg-yellow-500">レビューを書く</button>
-                                                        </div>
-                                                    )}
-                                                </li>
-                                            ) : null;
-                                        })}
-                                    </ul>
-                                ) : <p className="text-stone-500">購入したサービスはありません。</p>}
-                            </div>
-                        </>
-                    )}
-                    
-                    {/* Provider Dashboard */}
-                    {currentUser.role === UserRole.PROVIDER && (
-                        <>
-                            <div className="flex justify-between items-center bg-white p-6 rounded-lg shadow-md">
-                                <h2 className="text-xl font-bold text-stone-700">QR受付・スキャン</h2>
-                                <button onClick={() => setScanModalOpen(true)} className="flex items-center bg-stone-800 text-white px-4 py-2 rounded-lg hover:bg-stone-900">
-                                    <QrcodeIcon className="w-5 h-5 mr-2" />
-                                    受付を開始
-                                </button>
-                            </div>
-
-                             <div className="bg-white p-6 rounded-lg shadow-md">
-                                <h2 className="text-xl font-bold text-stone-700 mb-4">出展申込状況</h2>
-                                {myEventRegistrations.length > 0 ? (
-                                    <ul className="space-y-3">
-                                        {myEventRegistrations.map(reg => {
-                                            const event = events.find(e => e.id === reg.eventId);
-                                            return event ? (
-                                                <li key={reg.id} className="flex justify-between items-center p-3 bg-stone-50 rounded-md">
-                                                    <div>
-                                                        <p className="font-semibold">{event.name}</p>
-                                                        <p className="text-sm text-stone-500">{event.date}</p>
-                                                    </div>
-                                                    <div className="flex items-center space-x-4">
-                                                        <span className={`text-xs font-medium px-2 py-1 rounded-full ${registrationStatusText[reg.status].color}`}>{registrationStatusText[reg.status].text}</span>
-                                                        <button onClick={() => handleProviderRegisterClick(event.id, reg.id)} className="text-blue-600 hover:text-blue-800"><EditIcon className="w-5 h-5"/></button>
-                                                    </div>
-                                                </li>
-                                            ) : null;
-                                        })}
-                                    </ul>
-                                ) : <p className="text-stone-500">申込をしたイベントはありません。</p>}
-                            </div>
-                            <div className="bg-white p-6 rounded-lg shadow-md">
-                                <h2 className="text-xl font-bold text-stone-700 mb-4">受けた予約</h2>
-                                {receivedBookings.length > 0 ? (
-                                    <ul className="space-y-3">
-                                        {receivedBookings.map(booking => {
-                                            const user = users.find(u => u.id === booking.userId);
-                                            const event = events.find(e => e.id === booking.eventId);
-                                            const registration = eventRegistrations.find(r => r.providerId === currentUser.id && r.eventId === booking.eventId);
-                                            const timeSlot = registration?.timeSlots.find(ts => ts.id === booking.timeSlotId);
-                                            return (user && event && timeSlot) ? (
-                                                <li key={booking.id} className="p-3 bg-stone-50 rounded-md">
-                                                    <div className="flex justify-between items-center">
-                                                        <div>
-                                                            <p className="font-semibold">{user.name}さん - {timeSlot.startTime}~{timeSlot.endTime}</p>
-                                                            <p className="text-sm text-stone-500">{event.name} ({event.date})</p>
-                                                        </div>
-                                                        <div className="flex items-center gap-3">
-                                                            <span className={`text-xs font-medium px-2 py-1 rounded-full ${booking.bookingType === 'online' ? 'bg-cyan-100 text-cyan-800' : 'bg-green-100 text-green-800'}`}>
-                                                                {booking.bookingType}予約
-                                                            </span>
-                                                            <button onClick={() => handleOpenChat({
-                                                                id: booking.id,
-                                                                providerId: booking.providerId,
-                                                                buyerId: booking.userId,
-                                                                title: `${event.name} (${timeSlot.startTime}~)`
-                                                            })} className="text-blue-600 hover:text-blue-800 p-1" title="メッセージを送る">
-                                                                <ChatBubbleIcon className="w-5 h-5"/>
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </li>
-                                            ) : null;
-                                        })}
-                                    </ul>
-                                ) : <p className="text-stone-500">まだ予約はありません。</p>}
-                            </div>
-                            <div className="bg-white p-6 rounded-lg shadow-md">
-                                <h2 className="text-xl font-bold text-stone-700 mb-4">受けた依頼</h2>
-                                {receivedServiceOrders.length > 0 ? (
-                                    <ul className="space-y-3">
-                                        {receivedServiceOrders.map(order => {
-                                            const service = services.find(s => s.id === order.serviceId);
-                                            const buyer = users.find(u => u.id === order.buyerId);
-                                            return (service && buyer) ? (
-                                                <li key={order.id} className="p-3 bg-stone-50 rounded-md">
-                                                    <div className="flex justify-between items-start mb-2">
-                                                        <div>
-                                                            <p className="font-semibold">{service.title}</p>
-                                                            <p className="text-sm text-stone-500">依頼者: {buyer.name}さん</p>
-                                                            <p className="text-xs text-stone-400">依頼日: {order.createdAt}</p>
-                                                        </div>
-                                                        <div className="flex items-center gap-4">
-                                                             {renderServiceStatus(order.status)}
-                                                              <button onClick={() => handleOpenChat({
-                                                                id: order.id,
-                                                                providerId: order.providerId,
-                                                                buyerId: order.buyerId,
-                                                                title: service.title
-                                                              })} className="text-blue-600 hover:text-blue-800" title="メッセージを送る">
-                                                                <ChatBubbleIcon className="w-5 h-5"/>
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                    {order.status === 'requested' && (
-                                                        <div className="flex justify-end gap-2">
-                                                            <button onClick={() => handleUpdateServiceOrderStatus(order.id, 'cancelled')} className="text-sm bg-stone-200 text-stone-700 px-3 py-1 rounded-md hover:bg-stone-300">辞退</button>
-                                                            <button onClick={() => handleUpdateServiceOrderStatus(order.id, 'accepted')} className="text-sm bg-blue-600 text-white px-3 py-1 rounded-md hover:bg-blue-700">承認</button>
-                                                        </div>
-                                                    )}
-                                                     {order.status === 'accepted' && (
-                                                        <div className="flex justify-end gap-2">
-                                                            <button onClick={() => handleUpdateServiceOrderStatus(order.id, 'completed')} className="text-sm bg-green-600 text-white px-3 py-1 rounded-md hover:bg-green-700">完了にする</button>
-                                                        </div>
-                                                    )}
-                                                </li>
-                                            ) : null;
-                                        })}
-                                    </ul>
-                                ) : <p className="text-stone-500">まだ依頼はありません。</p>}
-                            </div>
-                        </>
-                    )}
-
+      <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <h1 className="text-3xl font-bold text-stone-800 mb-8 font-serif tracking-widest">マイページ</h1>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Column: Profile & Settings */}
+          <div className="space-y-6">
+             {/* Profile Card */}
+             <div className="bg-white rounded shadow-sm p-6 border border-stone-200">
+                <div className="flex items-center space-x-4 mb-4">
+                    <div className="bg-stone-100 p-3 rounded-full">
+                        <UserCircleIcon className="w-8 h-8 text-stone-500" />
+                    </div>
+                    <div>
+                        <h2 className="text-xl font-bold text-stone-800">{currentUser.name}</h2>
+                        <span className="text-xs uppercase bg-stone-100 text-stone-500 px-2 py-1 rounded">{currentUser.role}</span>
+                    </div>
                 </div>
-                {/* Right Sidebar */}
-                <div className="space-y-8">
-                     <div className="bg-white p-6 rounded-lg shadow-md">
-                        <h2 className="text-xl font-bold text-stone-700 mb-4">マイページ</h2>
-                        {currentUser.role === UserRole.MEMBER && (
-                             <div className="bg-white">
-                                <h3 className="text-lg font-bold text-stone-700 mb-4">お気に入り</h3>
-                                {myFavoriteProviders.length > 0 ? (
-                                    <ul className="space-y-3">
-                                        {myFavoriteProviders.map(fav => {
-                                            const provider = providers.find(p => p.id === fav.providerId);
-                                            return provider ? (
-                                                <li key={fav.providerId} className="flex items-center p-2 bg-stone-50 rounded-md">
-                                                    <img src={provider.profileImageUrl} alt={provider.providerName} className="w-8 h-8 rounded-full object-cover mr-3"/>
-                                                    <p className="font-semibold text-sm">{provider.providerName}</p>
-                                                </li>
-                                            ) : null;
-                                        })}
-                                    </ul>
-                                ) : <p className="text-stone-500">お気に入りの出展者はまだいません。</p>}
+                
+                {/* LINE Settings */}
+                <div className="border-t border-stone-100 pt-4 mt-4">
+                    <h3 className="font-semibold text-stone-700 mb-2 text-sm">LINE連携設定</h3>
+                    {currentUser.isLineLinked ? (
+                        <div className="space-y-3">
+                            <p className="text-green-600 text-sm flex items-center"><span className="mr-2">●</span>連携済み</p>
+                            <div className="space-y-2">
+                                <label className="flex items-center justify-between text-sm text-stone-600">
+                                    <span>イベント予約通知</span>
+                                    <input type="checkbox" checked={currentUser.lineNotificationSettings?.eventReservations} onChange={(e) => handleToggleLineNotification('eventReservations', e.target.checked)} className="rounded text-green-600 focus:ring-green-500"/>
+                                </label>
+                                <label className="flex items-center justify-between text-sm text-stone-600">
+                                    <span>お気に入り更新通知</span>
+                                    <input type="checkbox" checked={currentUser.lineNotificationSettings?.favoriteProviderUpdates} onChange={(e) => handleToggleLineNotification('favoriteProviderUpdates', e.target.checked)} className="rounded text-green-600 focus:ring-green-500"/>
+                                </label>
+                                <label className="flex items-center justify-between text-sm text-stone-600">
+                                    <span>サービス予約/依頼通知</span>
+                                    <input type="checkbox" checked={currentUser.lineNotificationSettings?.serviceBookings} onChange={(e) => handleToggleLineNotification('serviceBookings', e.target.checked)} className="rounded text-green-600 focus:ring-green-500"/>
+                                </label>
                             </div>
-                        )}
-                         <div className="bg-white pt-6">
-                            <h3 className="text-lg font-bold text-stone-700 mb-4">LINE連携</h3>
-                            {currentUser.isLineLinked ? (
-                                <div className="space-y-3">
-                                    <p className="p-3 bg-green-100 text-green-800 rounded-md text-sm">LINEアカウントと連携済みです。</p>
+                        </div>
+                    ) : (
+                        <div>
+                            <p className="text-stone-500 text-xs mb-2">LINE連携すると、予約確認やリマインド通知を受け取れます。</p>
+                            <button onClick={handleLinkLine} className="w-full bg-[#06C755] text-white py-2 rounded text-sm font-bold hover:bg-[#05b34c] transition-colors">LINEと連携する</button>
+                        </div>
+                    )}
+                </div>
+             </div>
+             
+             {/* Favorites (Member only) */}
+             {currentUser.role === UserRole.MEMBER && (
+                 <div className="bg-white rounded shadow-sm p-6 border border-stone-200">
+                    <h3 className="font-semibold text-stone-700 mb-4 flex items-center">
+                        <StarIcon className="w-5 h-5 mr-2 text-yellow-400" filled />
+                        お気に入り ({favorites.filter(f => f.userId === currentUser.id).length})
+                    </h3>
+                    <div className="space-y-3">
+                        {favorites.filter(f => f.userId === currentUser.id).map(fav => {
+                            const provider = providers.find(p => p.id === fav.providerId);
+                            if (!provider) return null;
+                            return (
+                                <div key={fav.providerId} className="flex items-center justify-between p-2 bg-stone-50 rounded">
+                                    <div className="flex items-center">
+                                         {provider.profileImageUrl ? (
+                                            <img src={provider.profileImageUrl} alt={provider.providerName} className="w-8 h-8 rounded-full object-cover mr-2" />
+                                        ) : <StoreIcon className="w-8 h-8 text-stone-400 mr-2"/>}
+                                        <span className="text-sm font-medium text-stone-700">{provider.providerName}</span>
+                                    </div>
+                                    <button onClick={() => handleToggleFavorite(provider.id)} className="text-stone-400 hover:text-red-500"><TrashIcon className="w-4 h-4"/></button>
+                                </div>
+                            );
+                        })}
+                        {favorites.filter(f => f.userId === currentUser.id).length === 0 && <p className="text-xs text-stone-400">お気に入りの出展者はまだいません。</p>}
+                    </div>
+                 </div>
+             )}
+          </div>
+          
+          {/* Center & Right Column: Main Content */}
+          <div className="lg:col-span-2 space-y-8">
+            
+            {/* Notifications / Messages */}
+            <div className="bg-white rounded shadow-sm p-6 border border-stone-200">
+                 <h2 className="text-xl font-bold text-stone-800 mb-4 font-serif">メッセージ / 通知</h2>
+                 <div className="space-y-2">
+                    {/* Service Orders */}
+                    {[...myServiceOrdersAsBuyer, ...myReceivedServiceOrders].filter(o => o.status !== 'completed' && o.status !== 'cancelled').map(order => {
+                         const service = services.find(s => s.id === order.serviceId);
+                         const otherUser = currentUser.id === order.buyerId 
+                            ? providers.find(p => p.id === order.providerId)?.providerName 
+                            : users.find(u => u.id === order.buyerId)?.name;
+                         
+                         return (
+                             <div key={order.id} className="p-3 bg-indigo-50 border border-indigo-100 rounded flex justify-between items-center">
+                                 <div>
+                                     <p className="text-sm font-semibold text-indigo-900">{service?.title}</p>
+                                     <p className="text-xs text-indigo-700">相手: {otherUser} | ステータス: {renderServiceStatus(order.status)}</p>
+                                 </div>
+                                 <button onClick={() => handleOpenChat({ id: order.id, providerId: order.providerId, buyerId: order.buyerId, title: service?.title || 'サービス' })} className="text-indigo-600 hover:text-indigo-800">
+                                     <ChatBubbleIcon className="w-5 h-5" />
+                                 </button>
+                             </div>
+                         )
+                    })}
+                     {/* My Bookings */}
+                     {myBookingsAsBuyer.map(booking => {
+                         const event = events.find(e => e.id === booking.eventId);
+                         const provider = providers.find(p => p.id === booking.providerId);
+                         const registration = eventRegistrations.find(r => r.eventId === booking.eventId && r.providerId === booking.providerId);
+                         const timeSlot = registration?.timeSlots.find(ts => ts.id === booking.timeSlotId) || {startTime: '?', endTime: '?'};
+                         return (
+                            <div key={booking.id} className="p-3 bg-teal-50 border border-teal-100 rounded flex justify-between items-center">
+                                 <div>
+                                     <p className="text-sm font-semibold text-teal-900">予約: {event?.name}</p>
+                                     <p className="text-xs text-teal-700">{provider?.providerName} | {timeSlot.startTime}~{timeSlot.endTime}</p>
+                                 </div>
+                                 <button onClick={() => handleCancelTimeSlotBooking(booking.id)} className="text-xs text-red-500 hover:underline">キャンセル</button>
+                             </div>
+                         );
+                     })}
+                     {/* Provider: Received Bookings */}
+                     {currentUser.role === UserRole.PROVIDER && receivedBookings.map(booking => {
+                         const event = events.find(e => e.id === booking.eventId);
+                         const user = users.find(u => u.id === booking.userId);
+                         const registration = eventRegistrations.find(r => r.eventId === booking.eventId && r.providerId === currentUser.id);
+                         const timeSlot = registration?.timeSlots.find(ts => ts.id === booking.timeSlotId);
+
+                         return (
+                            <div key={booking.id} className="p-3 bg-green-50 border border-green-100 rounded flex justify-between items-center">
+                                 <div>
+                                     <p className="text-sm font-semibold text-green-900">予約受付: {event?.name}</p>
+                                     <p className="text-xs text-green-700">予約者: {user?.name} | {timeSlot?.startTime}~{timeSlot?.endTime}</p>
+                                 </div>
+                            </div>
+                         );
+                     })}
+
+                     {/* Empty states */}
+                     {myServiceOrdersAsBuyer.length === 0 && myReceivedServiceOrders.length === 0 && myBookingsAsBuyer.length === 0 && receivedBookings.length === 0 && (
+                         <p className="text-stone-500 text-sm">現在進行中の取引やメッセージはありません。</p>
+                     )}
+                 </div>
+            </div>
+
+            {/* MEMBER: Tickets */}
+            {currentUser.role === UserRole.MEMBER && (
+                <div className="bg-white rounded shadow-sm p-6 border border-stone-200">
+                    <h2 className="text-xl font-bold text-stone-800 mb-4 font-serif">参加予定のイベント (チケット)</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {myEventReservations.map(res => {
+                            const event = events.find(e => e.id === res.eventId);
+                            if (!event) return null;
+                            const ticketId = `ticket-${event.id}-${currentUser.id}`;
+                            return (
+                                <div key={res.eventId} className="border border-stone-200 rounded-lg p-4 flex flex-col justify-between hover:shadow-md transition-shadow bg-stone-50">
                                     <div>
-                                        <h4 className="font-semibold text-stone-600 text-md mb-2">通知設定</h4>
-                                        <div className="space-y-2">
-                                            <label className="flex items-center justify-between text-sm">
-                                                <span>イベント予約・キャンセル</span>
-                                                <input type="checkbox" checked={currentUser.lineNotificationSettings?.eventReservations} onChange={e => handleToggleLineNotification('eventReservations', e.target.checked)} className="h-4 w-4 rounded border-stone-300 text-green-600 focus:ring-green-500"/>
-                                            </label>
-                                            <label className="flex items-center justify-between text-sm">
-                                                <span>サービス予約・キャンセル</span>
-                                                 <input type="checkbox" checked={currentUser.lineNotificationSettings?.serviceBookings} onChange={e => handleToggleLineNotification('serviceBookings', e.target.checked)} className="h-4 w-4 rounded border-stone-300 text-green-600 focus:ring-green-500"/>
-                                            </label>
-                                            <label className="flex items-center justify-between text-sm">
-                                                <span>お気に入り出展者の新着情報</span>
-                                                 <input type="checkbox" checked={currentUser.lineNotificationSettings?.favoriteProviderUpdates} onChange={e => handleToggleLineNotification('favoriteProviderUpdates', e.target.checked)} className="h-4 w-4 rounded border-stone-300 text-green-600 focus:ring-green-500"/>
-                                            </label>
+                                        <h3 className="font-bold text-stone-800 mb-1">{event.name}</h3>
+                                        <p className="text-sm text-stone-600 flex items-center mb-1"><CalendarIcon className="w-4 h-4 mr-1"/>{event.date} {event.startTime}</p>
+                                        <p className="text-xs text-stone-500">{event.location}</p>
+                                    </div>
+                                    <div className="mt-4 flex gap-2">
+                                        <button onClick={() => handleShowQR(event.name, ticketId)} className="flex-1 bg-stone-800 text-white py-2 rounded text-sm flex items-center justify-center hover:bg-stone-700 transition-colors">
+                                            <QrcodeIcon className="w-4 h-4 mr-2"/>チケット表示
+                                        </button>
+                                        <button onClick={() => handleCancelEventReservation(event.id)} className="px-3 py-2 text-xs text-stone-500 hover:text-red-500 border border-stone-300 rounded hover:bg-white transition-colors">
+                                            キャンセル
+                                        </button>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                        {myEventReservations.length === 0 && <p className="text-stone-500 text-sm col-span-2">参加予定のイベントはありません。</p>}
+                    </div>
+                </div>
+            )}
+            
+            {/* PROVIDER: Registrations & Services */}
+            {(currentUser.role === UserRole.PROVIDER || currentUser.role === UserRole.ADMIN) && (
+                <div className="space-y-8">
+                     {/* Scan Button for Providers */}
+                     <div className="bg-stone-800 text-white rounded shadow-sm p-6 flex justify-between items-center">
+                        <div>
+                            <h2 className="text-xl font-bold font-serif mb-1">QR受付</h2>
+                            <p className="text-stone-300 text-sm">参加者のチケットQRコードをスキャンして受付を行います。</p>
+                        </div>
+                        <button onClick={() => setScanModalOpen(true)} className="bg-white text-stone-900 px-6 py-3 rounded font-bold hover:bg-stone-100 transition-colors flex items-center">
+                            <QrcodeIcon className="w-5 h-5 mr-2"/> スキャン起動
+                        </button>
+                     </div>
+
+                    <div className="bg-white rounded shadow-sm p-6 border border-stone-200">
+                        <div className="flex justify-between items-center mb-4">
+                            <h2 className="text-xl font-bold text-stone-800 font-serif">出展イベント管理</h2>
+                            <button onClick={() => setView('home')} className="text-sm text-teal-700 hover:underline">イベントを探す</button>
+                        </div>
+                        <div className="space-y-4">
+                            {myRegistrations.map(reg => {
+                                const event = events.find(e => e.id === reg.eventId);
+                                if (!event) return null;
+                                return (
+                                    <div key={reg.id} className="border border-stone-200 rounded p-4 flex justify-between items-center bg-stone-50">
+                                        <div>
+                                            <h3 className="font-bold text-stone-800">{event.name}</h3>
+                                            <p className="text-xs text-stone-500">{event.date} | ステータス: <span className={`font-semibold ${reg.status === RegistrationStatus.APPROVED ? 'text-green-600' : 'text-yellow-600'}`}>{reg.status === RegistrationStatus.APPROVED ? '承認済み' : reg.status === RegistrationStatus.SUBMITTED ? '承認待ち' : '下書き'}</span></p>
+                                        </div>
+                                        <button onClick={() => handleProviderRegisterClick(event.id, reg.id)} className="text-sm bg-white border border-stone-300 px-3 py-1 rounded hover:bg-stone-100 text-stone-600">
+                                            編集
+                                        </button>
+                                    </div>
+                                );
+                            })}
+                             {myRegistrations.length === 0 && <p className="text-stone-500 text-sm">出展登録しているイベントはありません。</p>}
+                        </div>
+                    </div>
+                    
+                    <div className="bg-white rounded shadow-sm p-6 border border-stone-200">
+                         <div className="flex justify-between items-center mb-4">
+                            <h2 className="text-xl font-bold text-stone-800 font-serif">出品サービス管理</h2>
+                            <button onClick={() => setServiceFormOpen(true)} className="text-sm text-indigo-700 hover:underline flex items-center"><PlusIcon className="w-4 h-4 mr-1"/>新規出品</button>
+                        </div>
+                        <div className="space-y-4">
+                            {myServices.map(service => (
+                                <div key={service.id} className="border border-stone-200 rounded p-4 flex gap-4 bg-stone-50">
+                                    <img src={service.imageUrl} alt={service.title} className="w-20 h-20 object-cover rounded bg-stone-200"/>
+                                    <div className="flex-grow">
+                                        <h3 className="font-bold text-stone-800 text-sm">{service.title}</h3>
+                                        <p className="text-xs text-stone-500 mt-1">{service.category} | &yen;{service.price.toLocaleString()}</p>
+                                        <div className="mt-2 flex gap-2">
+                                            <button onClick={() => handleSelectService(service)} className="text-xs bg-white border border-stone-300 px-3 py-1 rounded hover:bg-stone-100 text-stone-600">詳細・プレビュー</button>
                                         </div>
                                     </div>
                                 </div>
-                            ) : (
-                                <button onClick={handleLinkLine} className="w-full flex items-center justify-center p-3 rounded-lg bg-[#06C755] text-white hover:bg-[#05b34c] transition-colors">
-                                    <ChatBubbleIcon className="w-5 h-5 mr-2"/>
-                                    LINEと連携する
-                                </button>
-                            )}
-                         </div>
+                            ))}
+                            {myServices.length === 0 && <p className="text-stone-500 text-sm">出品しているサービスはありません。</p>}
+                        </div>
                     </div>
+                    
+                    {/* Received Service Orders */}
+                    {myReceivedServiceOrders.length > 0 && (
+                         <div className="bg-white rounded shadow-sm p-6 border border-stone-200">
+                            <h2 className="text-xl font-bold text-stone-800 font-serif mb-4">サービス依頼一覧</h2>
+                            <div className="space-y-4">
+                                {myReceivedServiceOrders.map(order => {
+                                    const service = services.find(s => s.id === order.serviceId);
+                                    const buyer = users.find(u => u.id === order.buyerId);
+                                    return (
+                                        <div key={order.id} className="border border-stone-200 rounded p-4 bg-stone-50">
+                                            <div className="flex justify-between items-start mb-2">
+                                                <div>
+                                                    <h3 className="font-bold text-stone-800 text-sm">{service?.title}</h3>
+                                                    <p className="text-xs text-stone-500">依頼者: {buyer?.name}</p>
+                                                </div>
+                                                {renderServiceStatus(order.status)}
+                                            </div>
+                                            <div className="flex justify-end gap-2 mt-2">
+                                                <button onClick={() => handleOpenChat({ id: order.id, providerId: order.providerId, buyerId: order.buyerId, title: service?.title || 'サービス' })} className="text-xs bg-indigo-100 text-indigo-800 px-3 py-1 rounded hover:bg-indigo-200 flex items-center">
+                                                    <ChatBubbleIcon className="w-3 h-3 mr-1"/>メッセージ
+                                                </button>
+                                                {order.status === 'requested' && (
+                                                    <button onClick={() => handleUpdateServiceOrderStatus(order.id, 'accepted')} className="text-xs bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700">承認する</button>
+                                                )}
+                                                {order.status === 'accepted' && (
+                                                    <button onClick={() => handleUpdateServiceOrderStatus(order.id, 'completed')} className="text-xs bg-teal-600 text-white px-3 py-1 rounded hover:bg-teal-700">完了にする</button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                         </div>
+                    )}
                 </div>
-            </div>
-        </main>
+            )}
+
+          </div>
+        </div>
+      </main>
     );
   };
   
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col font-serif bg-stone-50/50">
       <Header
         user={currentUser}
         onLoginClick={() => setAuthModalOpen(true)}
@@ -1444,11 +1434,10 @@ const App: React.FC = () => {
         onCreateEventClick={() => setEventFormOpen(true)}
         onCreateServiceClick={() => setServiceFormOpen(true)}
         onDashboardClick={() => setView('dashboard')}
-        onHomeClick={() => setView('home')}
-        onServiceListClick={() => setView('serviceList')}
+        onHomeClick={() => { setView('home'); setSearchType('events'); }}
+        onServiceListClick={() => { setView('home'); setSearchType('services'); }}
       />
       {view === 'home' && <HomePage />}
-      {view === 'serviceList' && <ServiceListPage />}
       {view === 'dashboard' && <DashboardPage />}
 
       <Footer />
@@ -1460,7 +1449,7 @@ const App: React.FC = () => {
         onLineLogin={handleLineLogin}
         users={users}
       />
-      <Modal isOpen={isEventFormOpen} onClose={() => setEventFormOpen(false)} title="新しいイベントを作成">
+      <Modal isOpen={isEventFormOpen} onClose={() => setEventFormOpen(false)} title="新しい催しを作成">
         <EventForm onAddEvent={handleAddEvent} onClose={() => setEventFormOpen(false)} />
       </Modal>
       <Modal isOpen={isServiceFormOpen} onClose={() => setServiceFormOpen(false)} title="新しいサービスを出品">
@@ -1552,7 +1541,7 @@ const App: React.FC = () => {
       <Modal isOpen={isGenericModalOpen} onClose={() => setGenericModalOpen(false)} title={genericModalContent.title}>
         <p className="whitespace-pre-wrap">{genericModalContent.message}</p>
         <div className="text-right mt-4">
-          <button onClick={() => setGenericModalOpen(false)} className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">閉じる</button>
+          <button onClick={() => setGenericModalOpen(false)} className="bg-teal-700 text-white px-4 py-2 rounded hover:bg-teal-800 transition-colors">閉じる</button>
         </div>
       </Modal>
     </div>

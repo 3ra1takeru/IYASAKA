@@ -15,12 +15,24 @@ interface AuthModalProps {
 
 const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLogin, onLineLogin, users }) => {
   const [showDemoUserSelection, setShowDemoUserSelection] = useState(false);
+  const [currentRedirectUri, setCurrentRedirectUri] = useState('');
+
+  // 現在のURL（クエリパラメータなどを除く）を取得するヘルパー関数
+  const getRedirectUri = () => {
+    if (typeof window === 'undefined') return '';
+    const url = new URL(window.location.href);
+    // origin (https://example.com) + pathname (/iyasaka/) を結合
+    // 末尾のスラッシュの有無も現在のブラウザ表示に従うため、登録と一致させやすい
+    return `${url.origin}${url.pathname}`;
+  };
 
   // Reset internal state when modal is closed/reopened
   useEffect(() => {
     if (!isOpen) {
       setShowDemoUserSelection(false);
     }
+    // クライアントサイドでのみ実行
+    setCurrentRedirectUri(getRedirectUri());
   }, [isOpen]);
 
   const handleClose = () => {
@@ -30,7 +42,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLogin, onLineL
   const handleRealLineLoginRedirect = () => {
     // 実際のアプリでは環境変数などからクライアントIDを取得します
     const LINE_CLIENT_ID = '2008776261'; // 設定されたチャネルID
-    const REDIRECT_URI = window.location.origin; // 現在のドメインをリダイレクト先とする
+    const REDIRECT_URI = getRedirectUri(); // 動的に取得したリダイレクトURI
     const state = Math.random().toString(36).substring(7); // CSRF対策のランダムな文字列
 
     // bot_prompt=normal を追加することで、ログイン時に公式アカウントの友だち追加を促します。
@@ -86,6 +98,20 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLogin, onLineL
         <p className="text-xs text-center text-stone-400">
             公式アカウントと連携し、予約完了通知やリマインドを受け取ることができます。
         </p>
+
+        {/* 開発者向けヘルプメッセージ: 400エラー対策 */}
+        <div className="bg-stone-100 p-3 rounded-md text-xs text-stone-600 border border-stone-200">
+            <p className="font-bold text-stone-700 mb-1 flex items-center">
+                <span className="mr-1">⚠️</span> 400エラーが出る場合
+            </p>
+            <p className="mb-2 leading-relaxed">
+                LINE Developersコンソールの「LINEログイン設定」＞「コールバックURL」に、以下のURLを<b>正確に</b>追加登録してください。<br/>
+                （末尾のスラッシュの有無も一致させる必要があります）
+            </p>
+            <div className="bg-white p-2 rounded border border-stone-300 break-all font-mono select-all">
+                {currentRedirectUri}
+            </div>
+        </div>
 
         <div className="relative pt-2">
           <div className="absolute inset-0 flex items-center pt-2">

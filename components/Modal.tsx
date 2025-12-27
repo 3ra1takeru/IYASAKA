@@ -14,16 +14,16 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
 
   return (
     <div 
-      className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center"
+      className="fixed inset-0 bg-stone-900/60 backdrop-blur-sm z-50 flex justify-center items-center"
       onClick={onClose}
     >
       <div 
-        className="bg-white rounded-lg shadow-xl w-full max-w-md m-4 p-6 relative animate-fade-in-down"
+        className="bg-[#faf9f6] rounded shadow-xl w-full max-w-md m-4 p-6 relative animate-fade-in-down border border-stone-200"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-bold text-green-800">{title}</h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-800">
+        <div className="flex justify-between items-center mb-6 border-b border-stone-200 pb-2">
+          <h2 className="text-xl font-bold text-stone-800 font-serif tracking-wide">{title}</h2>
+          <button onClick={onClose} className="text-stone-400 hover:text-stone-700 transition-colors">
             <CloseIcon className="w-6 h-6" />
           </button>
         </div>

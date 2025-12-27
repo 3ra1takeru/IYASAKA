@@ -128,6 +128,7 @@ export interface Service {
     price: number;
     imageUrl: string;
     deliveryMethod: 'online' | 'offline' | 'both';
+    location: string; // 都道府県を追加
     status: 'open' | 'closed';
 }
 
