@@ -55,29 +55,29 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLogin, onLineL
 
   if (showDemoUserSelection) {
     return (
-      <Modal isOpen={isOpen} onClose={handleClose} title="デモログイン (LINE連携シミュレーション)">
+      <Modal isOpen={isOpen} onClose={handleClose} title="デモユーザー選択">
         <div className="space-y-4">
-          <p className="text-stone-600">LINEログインがキャンセルされたか、設定に問題がある場合に表示されます。</p>
-          {users.filter(u => u.role !== UserRole.ADMIN).map((user) => (
+          <p className="text-sm text-stone-600 mb-2">ログインするデモアカウントを選択してください。</p>
+          {users.map((user) => (
             <button
               key={user.id}
               onClick={() => {
                 onLineLogin(user);
                 onClose();
               }}
-              className="w-full flex items-center text-left p-4 rounded-lg border border-stone-200 hover:bg-stone-100 hover:border-green-500 transition-all duration-200"
+              className="w-full flex items-center text-left p-3 rounded-lg border border-stone-200 hover:bg-stone-100 hover:border-green-500 transition-all duration-200"
             >
-              <UserCircleIcon className="w-8 h-8 text-green-600 mr-4" />
-              <div>
-                <p className="font-bold text-lg text-stone-800">{user.name}</p>
+              <UserCircleIcon className="w-8 h-8 text-green-600 mr-3 flex-shrink-0" />
+              <div className="min-w-0">
+                <p className="font-bold text-base text-stone-800 truncate">{user.name}</p>
                 <div className="flex items-center space-x-2">
-                  <p className="text-sm text-stone-500 uppercase">{user.role}</p>
-                  {user.instagramId && <p className="text-xs text-stone-400">@{user.instagramId}</p>}
+                  <p className="text-xs text-stone-500 uppercase">{user.role}</p>
+                  {user.instagramId && <p className="text-xs text-stone-400 truncate">@{user.instagramId}</p>}
                 </div>
               </div>
             </button>
           ))}
-          <button onClick={() => setShowDemoUserSelection(false)} className="w-full mt-2 text-center p-2 text-sm text-stone-600 hover:bg-stone-100 rounded-md transition-colors">
+          <button onClick={() => setShowDemoUserSelection(false)} className="w-full mt-4 bg-stone-200 text-stone-800 py-2 rounded hover:bg-stone-300 transition-colors">
             戻る
           </button>
         </div>
@@ -87,17 +87,19 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLogin, onLineL
 
   return (
     <Modal isOpen={isOpen} onClose={handleClose} title="ログイン">
-      <div className="space-y-4">
-        <button
-            onClick={handleRealLineLoginRedirect}
-            className="w-full flex items-center justify-center p-3 rounded-lg bg-[#06C755] text-white hover:bg-[#05b34c] transition-colors duration-200 shadow-sm"
-          >
-            <ChatBubbleIcon className="w-6 h-6 mr-3"/>
-            <span className="font-bold text-lg">LINEでログイン</span>
-        </button>
-        <p className="text-xs text-center text-stone-400">
-            公式アカウントと連携し、予約完了通知やリマインドを受け取ることができます。
-        </p>
+      <div className="space-y-6">
+        <div>
+            <button
+                onClick={handleRealLineLoginRedirect}
+                className="w-full flex items-center justify-center p-3 rounded-lg bg-[#06C755] text-white hover:bg-[#05b34c] transition-colors duration-200 shadow-sm"
+            >
+                <ChatBubbleIcon className="w-6 h-6 mr-3"/>
+                <span className="font-bold text-lg">LINEでログイン</span>
+            </button>
+            <p className="text-xs text-center text-stone-400 mt-2">
+                公式アカウントと連携し、予約完了通知やリマインドを受け取ることができます。
+            </p>
+        </div>
 
         {/* 開発者向けヘルプメッセージ: 400エラー対策 */}
         <div className="bg-stone-100 p-3 rounded-md text-xs text-stone-600 border border-stone-200">
@@ -113,34 +115,22 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLogin, onLineL
             </div>
         </div>
 
-        <div className="relative pt-2">
-          <div className="absolute inset-0 flex items-center pt-2">
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-stone-300"></div>
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-white text-stone-500">またはデモユーザーでログイン</span>
+            <span className="px-2 bg-[#faf9f6] text-stone-500">デモ環境用</span>
           </div>
         </div>
         
-        {users.map((user) => (
-          <button
-            key={user.id}
-            onClick={() => {
-              onLogin(user);
-              onClose();
-            }}
-            className="w-full flex items-center text-left p-4 rounded-lg border border-stone-200 hover:bg-stone-100 hover:border-green-500 transition-all duration-200"
-          >
-            <UserCircleIcon className="w-8 h-8 text-green-600 mr-4" />
-            <div>
-              <p className="font-bold text-lg text-stone-800">{user.name}</p>
-              <div className="flex items-center space-x-2">
-                <p className="text-sm text-stone-500 uppercase">{user.role}</p>
-                {user.instagramId && <p className="text-xs text-stone-400">@{user.instagramId}</p>}
-              </div>
-            </div>
-          </button>
-        ))}
+        <button
+            onClick={() => setShowDemoUserSelection(true)}
+            className="w-full flex items-center justify-center p-3 rounded-lg border border-stone-300 text-stone-600 hover:bg-stone-50 transition-all duration-200 bg-white"
+        >
+            <UserCircleIcon className="w-6 h-6 mr-2 text-stone-400" />
+            <span className="font-medium">デモアカウントでログイン</span>
+        </button>
       </div>
     </Modal>
   );

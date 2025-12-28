@@ -74,9 +74,10 @@ const Header: React.FC<HeaderProps> = ({ user, onLoginClick, onLogoutClick, onCr
             ) : (
               <button
                 onClick={onLoginClick}
-                className="bg-stone-800 text-white px-5 py-2 rounded shadow-sm hover:bg-stone-700 transition-colors duration-200 text-sm font-medium tracking-wide"
+                className="bg-stone-800 text-white px-3 py-2 sm:px-5 rounded shadow-sm hover:bg-stone-700 transition-colors duration-200 text-xs sm:text-sm font-medium tracking-wide whitespace-nowrap shrink-0"
               >
-                ログイン / 登録
+                <span className="inline sm:hidden">ログイン</span>
+                <span className="hidden sm:inline">ログイン / 登録</span>
               </button>
             )}
           </div>
