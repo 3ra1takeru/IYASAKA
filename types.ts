@@ -34,6 +34,7 @@ export enum EventType {
 
 export interface Event {
   id: string;
+  ownerId?: string; // 主催者のユーザーID
   name: string;
   date: string;
   startTime: string;
@@ -53,6 +54,7 @@ export enum RegistrationStatus {
   DRAFT = 'draft',
   SUBMITTED = 'submitted',
   APPROVED = 'approved',
+  REJECTED = 'rejected', // 追加
 }
 
 export enum OfferingType {

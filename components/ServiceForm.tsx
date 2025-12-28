@@ -1,9 +1,11 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Service, ServiceCategory } from '../types';
 
 interface ServiceFormProps {
   onAddService: (service: Omit<Service, 'id' | 'providerId' | 'status'>) => void;
+  onUpdateService?: (id: string, service: Partial<Service>) => void; // 編集用コールバック
+  initialService?: Service | null; // 編集時の初期データ
   onClose: () => void;
 }
 
@@ -17,7 +19,7 @@ const PREFECTURES = [
   '熊本県', '大分県', '宮崎県', '鹿児島県', '沖縄県'
 ];
 
-const ServiceForm: React.FC<ServiceFormProps> = ({ onAddService, onClose }) => {
+const ServiceForm: React.FC<ServiceFormProps> = ({ onAddService, onUpdateService, initialService, onClose }) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState<ServiceCategory>(ServiceCategory.FORTUNE);
@@ -27,6 +29,21 @@ const ServiceForm: React.FC<ServiceFormProps> = ({ onAddService, onClose }) => {
   const [address, setAddress] = useState('');
   const [googleMapUrl, setGoogleMapUrl] = useState('');
   const [meetingUrl, setMeetingUrl] = useState('');
+
+  // 編集モードの場合、初期値をセット
+  useEffect(() => {
+    if (initialService) {
+        setTitle(initialService.title);
+        setDescription(initialService.description);
+        setCategory(initialService.category);
+        setPrice(initialService.price);
+        setDeliveryMethod(initialService.deliveryMethod);
+        setLocation(initialService.location === 'オンライン' ? '東京都' : initialService.location);
+        setAddress(initialService.address || '');
+        setGoogleMapUrl(initialService.googleMapUrl || '');
+        setMeetingUrl(initialService.meetingUrl || '');
+    }
+  }, [initialService]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,7 +57,7 @@ const ServiceForm: React.FC<ServiceFormProps> = ({ onAddService, onClose }) => {
         return;
     }
 
-    onAddService({
+    const serviceData = {
       title,
       description,
       category,
@@ -50,8 +67,14 @@ const ServiceForm: React.FC<ServiceFormProps> = ({ onAddService, onClose }) => {
       address: deliveryMethod !== 'online' ? address : undefined,
       googleMapUrl: deliveryMethod !== 'online' ? googleMapUrl : undefined,
       meetingUrl: deliveryMethod !== 'offline' ? meetingUrl : undefined,
-      imageUrl: `https://picsum.photos/seed/${title}/400/300`,
-    });
+      imageUrl: initialService?.imageUrl || `https://picsum.photos/seed/${title}/400/300`,
+    };
+
+    if (initialService && onUpdateService) {
+        onUpdateService(initialService.id, serviceData);
+    } else {
+        onAddService(serviceData);
+    }
     onClose();
   };
 
@@ -118,7 +141,9 @@ const ServiceForm: React.FC<ServiceFormProps> = ({ onAddService, onClose }) => {
         </div>
         <div className="flex justify-end space-x-2 pt-4">
             <button type="button" onClick={onClose} className="bg-stone-200 text-stone-800 px-4 py-2 rounded-lg hover:bg-stone-300 transition-colors">キャンセル</button>
-            <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">サービスを出品</button>
+            <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                {initialService ? '保存する' : 'サービスを出品'}
+            </button>
         </div>
         </form>
     </div>

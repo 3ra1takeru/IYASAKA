@@ -35,7 +35,7 @@ const defaultLineSettings = {
 
 // Mock Data
 const MOCK_USERS: User[] = [
-  { id: 'admin1', name: '管理者A', role: UserRole.ADMIN },
+  { id: 'organizer1', name: 'マルシェ主催者', role: UserRole.ADMIN, profileImageUrl: 'https://picsum.photos/seed/organizer/200' }, // 主催者アカウントを追加
   { id: 'provider1', name: '花屋さん', role: UserRole.PROVIDER, instagramId: 'hanaya_hidamari', isLineLinked: true, lineNotificationSettings: { ...defaultLineSettings }, profileImageUrl: 'https://picsum.photos/seed/flower-shop/200' },
   { id: 'provider2', name: 'パン屋さん', role: UserRole.PROVIDER, instagramId: 'komugi_bakery', isLineLinked: false, lineNotificationSettings: { ...defaultLineSettings }, profileImageUrl: 'https://picsum.photos/seed/bakery/200' },
   { id: 'provider3', name: '占い師さん', role: UserRole.PROVIDER, isLineLinked: false, lineNotificationSettings: { ...defaultLineSettings }, profileImageUrl: 'https://picsum.photos/seed/fortune-teller/200' },
@@ -77,10 +77,10 @@ const PREFECTURES = [
 ];
 
 const MOCK_EVENTS: Event[] = [
-  { id: 'event-past-1', name: '春のオーガニックマルシェ', date: getPastDate(90), startTime: '10:00', endTime: '17:00', location: '東京都 代々木公園', format: 'offline', googleMapUrl: 'https://goo.gl/maps/1', description: '新鮮なオーガニック野菜や果物、手作りのジャムやパンが並びます。心地よい春の風を感じながら、特別な逸品を見つけに来てください。', imageUrl: 'https://picsum.photos/seed/spring-marche/800/600', isApprovalRequiredForVendors: true, eventType: EventType.MARCHE },
-  { id: 'event-future-1', name: '夏のクラフトフェア', date: getFutureDate(30), startTime: '11:00', endTime: '19:00', location: '神奈川県 赤レンガ倉庫', format: 'offline', googleMapUrl: 'https://goo.gl/maps/2', description: '全国から集まった作家による、個性豊かなアクセサリー、陶器、布小物などが並びます。あなただけのお気に入りを見つけに来てください。', imageUrl: 'https://picsum.photos/seed/craft-fair/800/600', isApprovalRequiredForVendors: true, eventType: EventType.MARCHE },
-  { id: 'event-future-3', name: 'Webデザイナ交流会', date: getFutureDate(45), startTime: '19:00', endTime: '21:00', location: '大阪府 co-working space ABC', format: 'ondemand', googleMapUrl: 'https://goo.gl/maps/3', onlineUrl: 'https://zoom.us/abc', description: 'Webデザイナーやフロントエンドエンジニア向けの交流会です。軽食をとりながら、情報交換やネットワーキングを楽しみましょう。', imageUrl: 'https://picsum.photos/seed/meetup/800/600', isApprovalRequiredForVendors: false, eventType: EventType.SEMINAR_MEETUP },
-  { id: 'event-future-2', name: '秋の手作り市', date: getFutureDate(90), startTime: '10:00', endTime: '16:00', location: '京都府 梅小路公園', format: 'offline', description: '温かみのある手作り雑貨やアート作品が勢揃い。作家さんとの会話も楽しみながら、お気に入りの一品を探してみませんか。', imageUrl: 'https://picsum.photos/seed/autumn-market/800/600', isApprovalRequiredForVendors: true, eventType: EventType.MARCHE }
+  { id: 'event-past-1', ownerId: 'organizer1', name: '春のオーガニックマルシェ', date: getPastDate(90), startTime: '10:00', endTime: '17:00', location: '東京都 代々木公園', format: 'offline', googleMapUrl: 'https://goo.gl/maps/1', description: '新鮮なオーガニック野菜や果物、手作りのジャムやパンが並びます。心地よい春の風を感じながら、特別な逸品を見つけに来てください。', imageUrl: 'https://picsum.photos/seed/spring-marche/800/600', isApprovalRequiredForVendors: true, eventType: EventType.MARCHE },
+  { id: 'event-future-1', ownerId: 'organizer1', name: '夏のクラフトフェア', date: getFutureDate(30), startTime: '11:00', endTime: '19:00', location: '神奈川県 赤レンガ倉庫', format: 'offline', googleMapUrl: 'https://goo.gl/maps/2', description: '全国から集まった作家による、個性豊かなアクセサリー、陶器、布小物などが並びます。あなただけのお気に入りを見つけに来てください。', imageUrl: 'https://picsum.photos/seed/craft-fair/800/600', isApprovalRequiredForVendors: true, eventType: EventType.MARCHE },
+  { id: 'event-future-3', ownerId: 'organizer1', name: 'Webデザイナ交流会', date: getFutureDate(45), startTime: '19:00', endTime: '21:00', location: '大阪府 co-working space ABC', format: 'ondemand', googleMapUrl: 'https://goo.gl/maps/3', onlineUrl: 'https://zoom.us/abc', description: 'Webデザイナーやフロントエンドエンジニア向けの交流会です。軽食をとりながら、情報交換やネットワーキングを楽しみましょう。', imageUrl: 'https://picsum.photos/seed/meetup/800/600', isApprovalRequiredForVendors: false, eventType: EventType.SEMINAR_MEETUP },
+  { id: 'event-future-2', ownerId: 'organizer1', name: '秋の手作り市', date: getFutureDate(90), startTime: '10:00', endTime: '16:00', location: '京都府 梅小路公園', format: 'offline', description: '温かみのある手作り雑貨やアート作品が勢揃い。作家さんとの会話も楽しみながら、お気に入りの一品を探してみませんか。', imageUrl: 'https://picsum.photos/seed/autumn-market/800/600', isApprovalRequiredForVendors: true, eventType: EventType.MARCHE }
 ];
 
 const MOCK_EVENT_REGISTRATIONS: EventRegistration[] = [
@@ -88,7 +88,7 @@ const MOCK_EVENT_REGISTRATIONS: EventRegistration[] = [
     { id: 'reg2', eventId: 'event-past-1', providerId: 'provider2', status: RegistrationStatus.APPROVED, offeringType: OfferingType.GOODS, products: MOCK_PRODUCTS.provider2, timeSlots: [] },
     { id: 'reg3', eventId: 'event-future-1', providerId: 'provider2', status: RegistrationStatus.DRAFT, offeringType: OfferingType.GOODS, products: [], timeSlots: [], notes: '検討中' },
     { id: 'reg4', eventId: 'event-future-1', providerId: 'provider3', status: RegistrationStatus.APPROVED, offeringType: OfferingType.SERVICE, products: [], timeSlots: MOCK_TIMESLOTS.provider3, isOnlineBookingEnabled: true },
-    { id: 'reg5', eventId: 'event-future-1', providerId: 'provider1', status: RegistrationStatus.APPROVED, offeringType: OfferingType.GOODS, products: [], timeSlots: [] },
+    { id: 'reg5', eventId: 'event-future-1', providerId: 'provider1', status: RegistrationStatus.SUBMITTED, offeringType: OfferingType.GOODS, products: [], timeSlots: [] }, // SUBMITTEDに変更して承認待ちを演出
     { id: 'reg6', eventId: 'event-future-2', providerId: 'provider1', status: RegistrationStatus.APPROVED, offeringType: OfferingType.GOODS, products: [], timeSlots: [] },
     { id: 'reg7', eventId: 'event-future-2', providerId: 'provider3', status: RegistrationStatus.SUBMITTED, offeringType: OfferingType.SERVICE, products: [], timeSlots: MOCK_TIMESLOTS.provider3, isOnlineBookingEnabled: true },
 ];
@@ -496,6 +496,87 @@ const ScanModal: React.FC<ScanModalProps> = ({ isOpen, onClose, onScan }) => {
     );
 }
 
+// New Component: Event Applications Modal for Organizers
+interface EventApplicationsModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    event: Event;
+    registrations: EventRegistration[];
+    providers: Provider[];
+    onUpdateStatus: (registrationId: string, status: RegistrationStatus) => void;
+}
+
+const EventApplicationsModal: React.FC<EventApplicationsModalProps> = ({ isOpen, onClose, event, registrations, providers, onUpdateStatus }) => {
+    if (!isOpen) return null;
+
+    // Filter registrations for this event
+    const eventRegistrations = registrations.filter(r => r.eventId === event.id);
+
+    return (
+        <Modal isOpen={isOpen} onClose={onClose} title={`${event.name} - 出展申込管理`}>
+             <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
+                {eventRegistrations.length > 0 ? (
+                    eventRegistrations.map(reg => {
+                        const provider = providers.find(p => p.id === reg.providerId);
+                        if (!provider) return null;
+                        
+                        return (
+                            <div key={reg.id} className="p-4 border border-stone-200 rounded-lg bg-white shadow-sm">
+                                <div className="flex justify-between items-start mb-2">
+                                    <div className="flex items-center">
+                                         {provider.profileImageUrl ? (
+                                            <img src={provider.profileImageUrl} alt={provider.providerName} className="w-10 h-10 rounded-full object-cover mr-3 border border-stone-200" />
+                                        ) : (
+                                            <StoreIcon className="w-10 h-10 text-stone-400 mr-3"/>
+                                        )}
+                                        <div>
+                                            <h4 className="font-bold text-stone-800">{provider.providerName}</h4>
+                                            <p className="text-xs text-stone-500">{provider.name}</p>
+                                        </div>
+                                    </div>
+                                    <span className={`px-2 py-1 text-xs font-bold rounded ${
+                                        reg.status === RegistrationStatus.APPROVED ? 'bg-green-100 text-green-800' :
+                                        reg.status === RegistrationStatus.REJECTED ? 'bg-red-100 text-red-800' :
+                                        reg.status === RegistrationStatus.SUBMITTED ? 'bg-yellow-100 text-yellow-800' :
+                                        'bg-stone-100 text-stone-600'
+                                    }`}>
+                                        {reg.status === RegistrationStatus.APPROVED ? '承認済み' :
+                                         reg.status === RegistrationStatus.REJECTED ? '却下' :
+                                         reg.status === RegistrationStatus.SUBMITTED ? '承認待ち' : '下書き'}
+                                    </span>
+                                </div>
+                                <div className="bg-stone-50 p-2 rounded text-sm text-stone-700 mb-3">
+                                    <p><span className="font-semibold">タイプ:</span> {reg.offeringType === OfferingType.GOODS ? '物品販売' : 'サービス提供'}</p>
+                                    {reg.notes && <p className="mt-1"><span className="font-semibold">備考:</span> {reg.notes}</p>}
+                                </div>
+                                
+                                {reg.status === RegistrationStatus.SUBMITTED && (
+                                    <div className="flex justify-end gap-2">
+                                        <button 
+                                            onClick={() => onUpdateStatus(reg.id, RegistrationStatus.REJECTED)}
+                                            className="px-3 py-1.5 text-xs bg-white border border-red-200 text-red-600 rounded hover:bg-red-50 transition-colors"
+                                        >
+                                            却下
+                                        </button>
+                                        <button 
+                                            onClick={() => onUpdateStatus(reg.id, RegistrationStatus.APPROVED)}
+                                            className="px-3 py-1.5 text-xs bg-green-600 text-white rounded hover:bg-green-700 transition-colors font-bold"
+                                        >
+                                            承認する
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })
+                ) : (
+                    <p className="text-stone-500 text-center py-4">まだ出展申込はありません。</p>
+                )}
+             </div>
+        </Modal>
+    );
+};
+
 
 const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -517,6 +598,7 @@ const App: React.FC = () => {
   const [isAuthModalOpen, setAuthModalOpen] = useState(false);
   const [isEventFormOpen, setEventFormOpen] = useState(false);
   const [isServiceFormOpen, setServiceFormOpen] = useState(false);
+  const [editingService, setEditingService] = useState<Service | null>(null); // 編集中のサービス
   const [isRegistrationFormOpen, setRegistrationFormOpen] = useState(false);
   const [registrationFormData, setRegistrationFormData] = useState<{eventId: string, registrationId?: string} | null>(null);
   const [isProviderDetailOpen, setProviderDetailOpen] = useState(false);
@@ -535,6 +617,10 @@ const App: React.FC = () => {
   const [qrData, setQrData] = useState<{data: string, title: string} | null>(null);
   
   const [isScanModalOpen, setScanModalOpen] = useState(false);
+  
+  const [isEventApplicationsModalOpen, setEventApplicationsModalOpen] = useState(false); // 主催者用
+  const [selectedEventForApplications, setSelectedEventForApplications] = useState<Event | null>(null); // 主催者用
+
   const [searchType, setSearchType] = useState<'events' | 'services'>('events');
 
   const receivedBookings = currentUser ? timeSlotBookings.filter(b => b.providerId === currentUser.id) : [];
@@ -607,7 +693,12 @@ const App: React.FC = () => {
   };
 
   const handleAddEvent = (newEventData: Omit<Event, 'id'>) => {
-    const newEvent: Event = { ...newEventData, id: `event${Date.now()}` };
+    // 現在のユーザーIDをownerIdとして設定
+    const newEvent: Event = { 
+        ...newEventData, 
+        id: `event${Date.now()}`,
+        ownerId: currentUser?.id 
+    };
     setEvents(prev => [...prev, newEvent].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()));
   };
   
@@ -620,6 +711,21 @@ const App: React.FC = () => {
         status: 'open',
     };
     setServices(prev => [newService, ...prev]);
+  };
+
+  const handleUpdateService = (id: string, serviceUpdate: Partial<Service>) => {
+      setServices(prev => prev.map(s => s.id === id ? { ...s, ...serviceUpdate } : s));
+      showMessage("更新完了", "サービス情報を更新しました。");
+  };
+
+  const handleEditServiceClick = (service: Service) => {
+    setEditingService(service);
+    setServiceFormOpen(true);
+  };
+  
+  const handleAddServiceClick = () => {
+      setEditingService(null);
+      setServiceFormOpen(true);
   };
 
   const handleMemberReserve = (eventId: string) => {
@@ -878,6 +984,18 @@ const App: React.FC = () => {
     } else {
         showMessage("エラー", "予約が見つかりません。チケットIDを確認してください。");
     }
+  };
+
+  // 主催者用：申込ステータス更新
+  const handleRegistrationStatusUpdate = (registrationId: string, status: RegistrationStatus) => {
+      setEventRegistrations(prev => prev.map(r => r.id === registrationId ? { ...r, status } : r));
+      const statusText = status === RegistrationStatus.APPROVED ? '承認' : '却下';
+      showMessage(`${statusText}完了`, `出展申込を${statusText}しました。`);
+  };
+
+  const handleOpenEventApplications = (event: Event) => {
+      setSelectedEventForApplications(event);
+      setEventApplicationsModalOpen(true);
   };
 
 
@@ -1175,6 +1293,9 @@ const App: React.FC = () => {
     const myRegistrations = eventRegistrations.filter(r => r.providerId === currentUser.id);
     const myServices = services.filter(s => s.providerId === currentUser.id);
     const myReceivedServiceOrders = serviceOrders.filter(o => o.providerId === currentUser.id);
+
+    // 主催しているイベント
+    const myHostedEvents = events.filter(e => e.ownerId === currentUser.id);
     
     const [isEditingProfile, setIsEditingProfile] = useState(false);
     const [editName, setEditName] = useState(currentUser.name);
@@ -1388,6 +1509,38 @@ const App: React.FC = () => {
                 </div>
             )}
             
+            {/* ORGANIZER: Hosted Events Management */}
+            {(currentUser.role === UserRole.ADMIN || currentUser.role === UserRole.PROVIDER) && myHostedEvents.length > 0 && (
+                <div className="bg-white rounded shadow-sm p-6 border border-stone-200">
+                    <div className="flex justify-between items-center mb-4">
+                        <h2 className="text-xl font-bold text-stone-800 font-serif">主催イベント管理</h2>
+                        <button onClick={() => setEventFormOpen(true)} className="text-sm text-teal-700 hover:underline flex items-center"><PlusIcon className="w-4 h-4 mr-1"/>新規作成</button>
+                    </div>
+                    <div className="space-y-4">
+                        {myHostedEvents.map(event => {
+                             const pendingCount = eventRegistrations.filter(r => r.eventId === event.id && r.status === RegistrationStatus.SUBMITTED).length;
+                             return (
+                                <div key={event.id} className="border border-stone-200 rounded p-4 flex justify-between items-center bg-stone-50">
+                                    <div>
+                                        <h3 className="font-bold text-stone-800">{event.name}</h3>
+                                        <p className="text-xs text-stone-500">{event.date} | {event.location}</p>
+                                        {pendingCount > 0 && (
+                                            <span className="inline-block bg-red-100 text-red-600 text-xs px-2 py-0.5 rounded-full mt-1 font-bold">承認待ち: {pendingCount}件</span>
+                                        )}
+                                    </div>
+                                    <button 
+                                        onClick={() => handleOpenEventApplications(event)} 
+                                        className="text-sm bg-white border border-stone-300 px-3 py-1 rounded hover:bg-stone-100 text-stone-600 flex items-center"
+                                    >
+                                        申込管理
+                                    </button>
+                                </div>
+                             );
+                        })}
+                    </div>
+                </div>
+            )}
+
             {/* PROVIDER: Registrations & Services */}
             {(currentUser.role === UserRole.PROVIDER || currentUser.role === UserRole.ADMIN) && (
                 <div className="space-y-8">
@@ -1430,18 +1583,21 @@ const App: React.FC = () => {
                     <div className="bg-white rounded shadow-sm p-6 border border-stone-200">
                          <div className="flex justify-between items-center mb-4">
                             <h2 className="text-xl font-bold text-stone-800 font-serif">出品サービス管理</h2>
-                            <button onClick={() => setServiceFormOpen(true)} className="text-sm text-indigo-700 hover:underline flex items-center"><PlusIcon className="w-4 h-4 mr-1"/>新規出品</button>
+                            <button onClick={handleAddServiceClick} className="text-sm text-indigo-700 hover:underline flex items-center"><PlusIcon className="w-4 h-4 mr-1"/>新規出品</button>
                         </div>
                         <div className="space-y-4">
                             {myServices.map(service => (
-                                <div key={service.id} className="border border-stone-200 rounded p-4 flex gap-4 bg-stone-50">
-                                    <img src={service.imageUrl} alt={service.title} className="w-20 h-20 object-cover rounded bg-stone-200"/>
+                                <div key={service.id} className="border border-stone-200 rounded p-4 flex gap-4 bg-stone-50 items-center">
+                                    <img src={service.imageUrl} alt={service.title} className="w-16 h-16 object-cover rounded bg-stone-200"/>
                                     <div className="flex-grow">
                                         <h3 className="font-bold text-stone-800 text-sm">{service.title}</h3>
                                         <p className="text-xs text-stone-500 mt-1">{service.category} | &yen;{service.price.toLocaleString()}</p>
-                                        <div className="mt-2 flex gap-2">
-                                            <button onClick={() => handleSelectService(service)} className="text-xs bg-white border border-stone-300 px-3 py-1 rounded hover:bg-stone-100 text-stone-600">詳細・プレビュー</button>
-                                        </div>
+                                    </div>
+                                    <div className="flex flex-col gap-2 shrink-0">
+                                        <button onClick={() => handleSelectService(service)} className="text-xs bg-white border border-stone-300 px-3 py-1 rounded hover:bg-stone-100 text-stone-600 text-center">プレビュー</button>
+                                        <button onClick={() => handleEditServiceClick(service)} className="text-xs bg-indigo-50 border border-indigo-200 text-indigo-700 px-3 py-1 rounded hover:bg-indigo-100 text-center flex items-center justify-center">
+                                            <EditIcon className="w-3 h-3 mr-1"/>編集
+                                        </button>
                                     </div>
                                 </div>
                             ))}
@@ -1499,7 +1655,7 @@ const App: React.FC = () => {
         onLoginClick={() => setAuthModalOpen(true)}
         onLogoutClick={handleLogout}
         onCreateEventClick={() => setEventFormOpen(true)}
-        onCreateServiceClick={() => setServiceFormOpen(true)}
+        onCreateServiceClick={handleAddServiceClick}
         onDashboardClick={() => setView('dashboard')}
         onHomeClick={() => { setView('home'); setSearchType('events'); }}
         onServiceListClick={() => { setView('home'); setSearchType('services'); }}
@@ -1519,8 +1675,13 @@ const App: React.FC = () => {
       <Modal isOpen={isEventFormOpen} onClose={() => setEventFormOpen(false)} title="新しい催しを作成">
         <EventForm onAddEvent={handleAddEvent} onClose={() => setEventFormOpen(false)} />
       </Modal>
-      <Modal isOpen={isServiceFormOpen} onClose={() => setServiceFormOpen(false)} title="新しいサービスを出品">
-        <ServiceForm onAddService={handleAddService} onClose={() => setServiceFormOpen(false)} />
+      <Modal isOpen={isServiceFormOpen} onClose={() => setServiceFormOpen(false)} title={editingService ? "サービス編集" : "新しいサービスを出品"}>
+        <ServiceForm 
+            onAddService={handleAddService} 
+            onUpdateService={handleUpdateService}
+            initialService={editingService}
+            onClose={() => setServiceFormOpen(false)} 
+        />
       </Modal>
       <Modal isOpen={isRegistrationFormOpen} onClose={() => setRegistrationFormOpen(false)} title="出展申込">
         {registrationFormData && currentUser?.role === UserRole.PROVIDER && (
@@ -1605,6 +1766,19 @@ const App: React.FC = () => {
         onClose={() => setScanModalOpen(false)}
         onScan={handleScanTicket}
       />
+      
+      {/* Event Applications Modal (New) */}
+      {selectedEventForApplications && (
+        <EventApplicationsModal 
+            isOpen={isEventApplicationsModalOpen}
+            onClose={() => setEventApplicationsModalOpen(false)}
+            event={selectedEventForApplications}
+            registrations={eventRegistrations}
+            providers={providers}
+            onUpdateStatus={handleRegistrationStatusUpdate}
+        />
+      )}
+
       <Modal isOpen={isGenericModalOpen} onClose={() => setGenericModalOpen(false)} title={genericModalContent.title}>
         <p className="whitespace-pre-wrap">{genericModalContent.message}</p>
         <div className="text-right mt-4">

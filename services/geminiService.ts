@@ -1,3 +1,4 @@
+
 import { GoogleGenAI } from "@google/genai";
 
 const API_KEY = process.env.API_KEY;
@@ -21,7 +22,7 @@ export const generateEventDescription = async (keywords: string): Promise<string
       contents: prompt,
     });
     
-    return response.text;
+    return response.text ?? "";
   } catch (error) {
     console.error("Error generating event description:", error);
     return "説明文の生成中にエラーが発生しました。";
@@ -41,7 +42,7 @@ export const generateServiceDescription = async (keywords: string): Promise<stri
             contents: prompt,
         });
 
-        return response.text;
+        return response.text ?? "";
     } catch (error) {
         console.error("Error generating service description:", error);
         return "説明文の生成中にエラーが発生しました。";
