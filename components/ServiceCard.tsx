@@ -10,6 +10,13 @@ interface ServiceCardProps {
 }
 
 const ServiceCard: React.FC<ServiceCardProps> = ({ service, provider, onSelect }) => {
+  const getDisplayLocation = () => {
+      if (service.deliveryMethod === 'ondemand') {
+          return `${service.location} & オンライン`;
+      }
+      return service.location;
+  };
+
   return (
     <button onClick={() => onSelect(service)} className="bg-white border border-stone-200 rounded shadow-sm hover:shadow-md overflow-hidden transform hover:-translate-y-0.5 transition-all duration-300 flex flex-col text-left w-full group">
       <div className="relative w-full h-48 overflow-hidden">
@@ -21,10 +28,10 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service, provider, onSelect }
             <LocationMarkerIcon className="w-3 h-3 mr-1 text-teal-600"/>
             {service.googleMapUrl ? (
                 <a href={service.googleMapUrl} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} className="hover:text-teal-800 hover:underline">
-                    {service.location}
+                    {getDisplayLocation()}
                 </a>
             ) : (
-                service.location
+                getDisplayLocation()
             )}
         </div>
       </div>

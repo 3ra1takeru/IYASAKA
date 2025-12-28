@@ -73,14 +73,25 @@ const EventCard: React.FC<EventCardProps> = ({ event, user, reservations, provid
     }
   };
 
+  const getFormatLabel = () => {
+      if (event.format === 'online') return 'オンライン';
+      // Extract the first part of the location (e.g., "京都府" from "京都府 梅小路公園")
+      const placeName = event.location.split(/[\s　]+/)[0];
+      
+      if (event.format === 'ondemand') {
+          return `${placeName} & オンライン`;
+      }
+      return placeName;
+  };
+
   return (
     <div className="bg-white border border-stone-200 rounded shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col overflow-hidden">
       <div className="relative">
         <img src={event.imageUrl} alt={event.name} className="w-full h-52 object-cover" />
-        <div className="absolute top-0 right-0 bg-white/90 backdrop-blur px-3 py-1 m-2 text-xs font-serif tracking-widest border border-stone-200">
-            {event.eventType === EventType.MARCHE ? 'マルシェ' : '交流会・講座'}
-            <span className="ml-2 px-1 bg-stone-100 rounded text-stone-600">
-                {event.format === 'online' ? 'オンライン' : event.format === 'ondemand' ? 'オンデマンド' : 'オフライン'}
+        <div className="absolute top-0 right-0 bg-white/90 backdrop-blur px-3 py-1 m-2 text-xs font-serif tracking-widest border border-stone-200 shadow-sm">
+            <span className="font-medium text-stone-600">{event.eventType === EventType.MARCHE ? 'マルシェ' : '交流会・講座'}</span>
+            <span className="ml-2 font-bold text-stone-800">
+                {getFormatLabel()}
             </span>
         </div>
       </div>
