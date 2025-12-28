@@ -15,7 +15,6 @@ interface AuthModalProps {
 
 const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLogin, onLineLogin, users }) => {
   const [showDemoUserSelection, setShowDemoUserSelection] = useState(false);
-  const [currentRedirectUri, setCurrentRedirectUri] = useState('');
 
   // 現在のURL（クエリパラメータなどを除く）を取得するヘルパー関数
   const getRedirectUri = () => {
@@ -31,8 +30,6 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLogin, onLineL
     if (!isOpen) {
       setShowDemoUserSelection(false);
     }
-    // クライアントサイドでのみ実行
-    setCurrentRedirectUri(getRedirectUri());
   }, [isOpen]);
 
   const handleClose = () => {
@@ -99,20 +96,6 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLogin, onLineL
             <p className="text-xs text-center text-stone-400 mt-2">
                 公式アカウントと連携し、予約完了通知やリマインドを受け取ることができます。
             </p>
-        </div>
-
-        {/* 開発者向けヘルプメッセージ: 400エラー対策 */}
-        <div className="bg-stone-100 p-3 rounded-md text-xs text-stone-600 border border-stone-200">
-            <p className="font-bold text-stone-700 mb-1 flex items-center">
-                <span className="mr-1">⚠️</span> 400エラーが出る場合
-            </p>
-            <p className="mb-2 leading-relaxed">
-                LINE Developersコンソールの「LINEログイン設定」＞「コールバックURL」に、以下のURLを<b>正確に</b>追加登録してください。<br/>
-                （末尾のスラッシュの有無も一致させる必要があります）
-            </p>
-            <div className="bg-white p-2 rounded border border-stone-300 break-all font-mono select-all">
-                {currentRedirectUri}
-            </div>
         </div>
 
         <div className="relative">

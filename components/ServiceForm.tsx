@@ -22,71 +22,106 @@ const ServiceForm: React.FC<ServiceFormProps> = ({ onAddService, onClose }) => {
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState<ServiceCategory>(ServiceCategory.FORTUNE);
   const [price, setPrice] = useState(3000);
-  const [deliveryMethod, setDeliveryMethod] = useState<'online' | 'offline' | 'both'>('online');
+  const [deliveryMethod, setDeliveryMethod] = useState<'online' | 'offline' | 'ondemand'>('online');
   const [location, setLocation] = useState('東京都');
+  const [address, setAddress] = useState('');
+  const [googleMapUrl, setGoogleMapUrl] = useState('');
+  const [meetingUrl, setMeetingUrl] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title || !description || !price || !location) {
-      alert('すべての必須項目を入力してください。');
+    if (!title || !description || !price) {
+      alert('必須項目を入力してください。');
       return;
     }
+
+    if (deliveryMethod !== 'online' && !location) {
+        alert('活動拠点（都道府県）を選択してください。');
+        return;
+    }
+
     onAddService({
       title,
       description,
       category,
       price,
       deliveryMethod,
-      location,
+      location: deliveryMethod === 'online' ? 'オンライン' : location,
+      address: deliveryMethod !== 'online' ? address : undefined,
+      googleMapUrl: deliveryMethod !== 'online' ? googleMapUrl : undefined,
+      meetingUrl: deliveryMethod !== 'offline' ? meetingUrl : undefined,
       imageUrl: `https://picsum.photos/seed/${title}/400/300`,
     });
     onClose();
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <label className="block text-sm font-medium text-stone-700">サービス名*</label>
-        <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} required className="mt-1 block w-full px-3 py-2 bg-white border border-stone-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"/>
-      </div>
-       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-         <div>
-            <label className="block text-sm font-medium text-stone-700">カテゴリ*</label>
-            <select value={category} onChange={e => setCategory(e.target.value as ServiceCategory)} className="mt-1 block w-full px-3 py-2 bg-white border border-stone-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                {Object.values(ServiceCategory).map(cat => <option key={cat} value={cat}>{cat}</option>)}
-            </select>
-         </div>
-         <div>
-            <label className="block text-sm font-medium text-stone-700">価格（円）*</label>
-            <input type="number" value={price} onChange={e => setPrice(parseInt(e.target.value, 10))} required min="500" step="100" className="mt-1 block w-full px-3 py-2 bg-white border border-stone-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"/>
-         </div>
-       </div>
-       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="max-h-[70vh] overflow-y-auto pr-2">
+        <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+            <label className="block text-sm font-medium text-stone-700">サービス名*</label>
+            <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} required className="mt-1 block w-full px-3 py-2 bg-white border border-stone-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"/>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-                <label className="block text-sm font-medium text-stone-700">都道府県 (活動拠点)*</label>
-                <select value={location} onChange={e => setLocation(e.target.value)} className="mt-1 block w-full px-3 py-2 bg-white border border-stone-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                    {PREFECTURES.map(p => <option key={p} value={p}>{p}</option>)}
+                <label className="block text-sm font-medium text-stone-700">カテゴリ*</label>
+                <select value={category} onChange={e => setCategory(e.target.value as ServiceCategory)} className="mt-1 block w-full px-3 py-2 bg-white border border-stone-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    {Object.values(ServiceCategory).map(cat => <option key={cat} value={cat}>{cat}</option>)}
                 </select>
             </div>
             <div>
-                <label className="block text-sm font-medium text-stone-700">提供方法*</label>
-                <div className="flex space-x-4 mt-2">
-                    <label className="flex items-center"><input type="radio" value="online" checked={deliveryMethod === 'online'} onChange={e => setDeliveryMethod(e.target.value as any)} className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-stone-300" /> <span className="ml-2 text-sm">オンライン</span></label>
-                    <label className="flex items-center"><input type="radio" value="offline" checked={deliveryMethod === 'offline'} onChange={e => setDeliveryMethod(e.target.value as any)} className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-stone-300" /> <span className="ml-2 text-sm">対面</span></label>
-                    <label className="flex items-center"><input type="radio" value="both" checked={deliveryMethod === 'both'} onChange={e => setDeliveryMethod(e.target.value as any)} className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-stone-300" /> <span className="ml-2 text-sm">両方</span></label>
+                <label className="block text-sm font-medium text-stone-700">価格（円）*</label>
+                <input type="number" value={price} onChange={e => setPrice(parseInt(e.target.value, 10))} required min="500" step="100" className="mt-1 block w-full px-3 py-2 bg-white border border-stone-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"/>
+            </div>
+        </div>
+
+        <div>
+            <label className="block text-sm font-medium text-stone-700">提供方法*</label>
+            <div className="flex space-x-4 mt-2">
+                <label className="flex items-center cursor-pointer"><input type="radio" value="online" checked={deliveryMethod === 'online'} onChange={e => setDeliveryMethod(e.target.value as any)} className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-stone-300" /> <span className="ml-2 text-sm">オンライン</span></label>
+                <label className="flex items-center cursor-pointer"><input type="radio" value="offline" checked={deliveryMethod === 'offline'} onChange={e => setDeliveryMethod(e.target.value as any)} className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-stone-300" /> <span className="ml-2 text-sm">対面</span></label>
+                <label className="flex items-center cursor-pointer"><input type="radio" value="ondemand" checked={deliveryMethod === 'ondemand'} onChange={e => setDeliveryMethod(e.target.value as any)} className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-stone-300" /> <span className="ml-2 text-sm">オンデマンド (両方)</span></label>
+            </div>
+        </div>
+
+        {(deliveryMethod === 'online' || deliveryMethod === 'ondemand') && (
+            <div>
+                <label className="block text-sm font-medium text-stone-700">ミーティングURL (Zoom, Google Meetなど)</label>
+                <input type="url" value={meetingUrl} onChange={(e) => setMeetingUrl(e.target.value)} placeholder="https://zoom.us/j/..." className="mt-1 block w-full px-3 py-2 bg-white border border-stone-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"/>
+                <p className="text-xs text-stone-500 mt-1">※ 予約成立後に依頼者に表示されます。</p>
+            </div>
+        )}
+        
+        {(deliveryMethod === 'offline' || deliveryMethod === 'ondemand') && (
+            <div className="space-y-4 bg-stone-50 p-3 rounded-md border border-stone-200">
+                <h4 className="text-sm font-semibold text-stone-700">開催場所の情報</h4>
+                <div>
+                    <label className="block text-sm font-medium text-stone-700">都道府県 (活動拠点)*</label>
+                    <select value={location} onChange={e => setLocation(e.target.value)} className="mt-1 block w-full px-3 py-2 bg-white border border-stone-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        {PREFECTURES.map(p => <option key={p} value={p}>{p}</option>)}
+                    </select>
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-stone-700">詳細な住所 / 施設名</label>
+                    <input type="text" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="〇〇市〇〇町 1-2-3 カフェ〇〇" className="mt-1 block w-full px-3 py-2 bg-white border border-stone-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"/>
+                </div>
+                 <div>
+                    <label className="block text-sm font-medium text-stone-700">Google Map URL</label>
+                    <input type="url" value={googleMapUrl} onChange={(e) => setGoogleMapUrl(e.target.value)} placeholder="https://goo.gl/maps/..." className="mt-1 block w-full px-3 py-2 bg-white border border-stone-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"/>
                 </div>
             </div>
-       </div>
+        )}
 
-      <div>
-        <label className="block text-sm font-medium text-stone-700">サービス説明*</label>
-        <textarea value={description} onChange={(e) => setDescription(e.target.value)} required rows={5} className="mt-1 block w-full px-3 py-2 bg-white border border-stone-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"/>
-      </div>
-      <div className="flex justify-end space-x-2 pt-4">
-        <button type="button" onClick={onClose} className="bg-stone-200 text-stone-800 px-4 py-2 rounded-lg hover:bg-stone-300 transition-colors">キャンセル</button>
-        <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">サービスを出品</button>
-      </div>
-    </form>
+        <div>
+            <label className="block text-sm font-medium text-stone-700">サービス説明*</label>
+            <textarea value={description} onChange={(e) => setDescription(e.target.value)} required rows={5} className="mt-1 block w-full px-3 py-2 bg-white border border-stone-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"/>
+        </div>
+        <div className="flex justify-end space-x-2 pt-4">
+            <button type="button" onClick={onClose} className="bg-stone-200 text-stone-800 px-4 py-2 rounded-lg hover:bg-stone-300 transition-colors">キャンセル</button>
+            <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">サービスを出品</button>
+        </div>
+        </form>
+    </div>
   );
 };
 

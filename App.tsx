@@ -7,10 +7,10 @@ import AuthModal from './components/AuthModal';
 import Modal from './components/Modal';
 import EventForm from './components/EventForm';
 import { User, Event, Provider, EventReservation, UserRole, EventRegistration, RegistrationStatus, OfferingType, Product, TimeSlot, TimeSlotBooking, Review, Favorite, EventType, Service, ServiceCategory, ServiceOrder, ServiceReview, ChatMessage } from './types';
-import ProviderDetailModal from './components/ProviderDetailModal';
+import ProviderDetailModal from './components/VendorDetailModal';
 import EventRegistrationForm from './components/EventRegistrationForm';
-import EventProvidersModal from './components/EventProvidersModal';
-import { EditIcon, TrashIcon, InstagramIcon, StarIcon, ChatBubbleIcon, BriefcaseIcon, UserCircleIcon, QrcodeIcon, CalendarIcon, StoreIcon, PlusIcon } from './components/icons';
+import EventProvidersModal from './components/EventVendorsModal';
+import { EditIcon, TrashIcon, InstagramIcon, StarIcon, ChatBubbleIcon, BriefcaseIcon, UserCircleIcon, QrcodeIcon, CalendarIcon, StoreIcon, PlusIcon, LocationMarkerIcon } from './components/icons';
 import ServiceCard from './components/ServiceCard';
 import ServiceForm from './components/ServiceForm';
 
@@ -36,9 +36,9 @@ const defaultLineSettings = {
 // Mock Data
 const MOCK_USERS: User[] = [
   { id: 'admin1', name: '管理者A', role: UserRole.ADMIN },
-  { id: 'provider1', name: '花屋さん', role: UserRole.PROVIDER, instagramId: 'hanaya_hidamari', isLineLinked: true, lineNotificationSettings: { ...defaultLineSettings } },
-  { id: 'provider2', name: 'パン屋さん', role: UserRole.PROVIDER, instagramId: 'komugi_bakery', isLineLinked: false, lineNotificationSettings: { ...defaultLineSettings } },
-  { id: 'provider3', name: '占い師さん', role: UserRole.PROVIDER, isLineLinked: false, lineNotificationSettings: { ...defaultLineSettings } },
+  { id: 'provider1', name: '花屋さん', role: UserRole.PROVIDER, instagramId: 'hanaya_hidamari', isLineLinked: true, lineNotificationSettings: { ...defaultLineSettings }, profileImageUrl: 'https://picsum.photos/seed/flower-shop/200' },
+  { id: 'provider2', name: 'パン屋さん', role: UserRole.PROVIDER, instagramId: 'komugi_bakery', isLineLinked: false, lineNotificationSettings: { ...defaultLineSettings }, profileImageUrl: 'https://picsum.photos/seed/bakery/200' },
+  { id: 'provider3', name: '占い師さん', role: UserRole.PROVIDER, isLineLinked: false, lineNotificationSettings: { ...defaultLineSettings }, profileImageUrl: 'https://picsum.photos/seed/fortune-teller/200' },
   { id: 'member1', name: '佐藤さん', role: UserRole.MEMBER, instagramId: 'sato_san_123', isLineLinked: true, lineNotificationSettings: { ...defaultLineSettings } },
   { id: 'member2', name: '鈴木さん', role: UserRole.MEMBER, isLineLinked: false, lineNotificationSettings: { ...defaultLineSettings, favoriteProviderUpdates: false } },
 ];
@@ -77,10 +77,10 @@ const PREFECTURES = [
 ];
 
 const MOCK_EVENTS: Event[] = [
-  { id: 'event-past-1', name: '春のオーガニックマルシェ', date: getPastDate(90), startTime: '10:00', endTime: '17:00', location: '東京都 代々木公園', description: '新鮮なオーガニック野菜や果物、手作りのジャムやパンが並びます。心地よい春の風を感じながら、特別な逸品を見つけに来てください。', imageUrl: 'https://picsum.photos/seed/spring-marche/800/600', isApprovalRequiredForVendors: true, eventType: EventType.MARCHE },
-  { id: 'event-future-1', name: '夏のクラフトフェア', date: getFutureDate(30), startTime: '11:00', endTime: '19:00', location: '神奈川県 赤レンガ倉庫', description: '全国から集まった作家による、個性豊かなアクセサリー、陶器、布小物などが並びます。あなただけのお気に入りを見つけてください。', imageUrl: 'https://picsum.photos/seed/craft-fair/800/600', isApprovalRequiredForVendors: true, eventType: EventType.MARCHE },
-  { id: 'event-future-3', name: 'Webデザイナ交流会', date: getFutureDate(45), startTime: '19:00', endTime: '21:00', location: '大阪府 co-working space ABC', description: 'Webデザイナーやフロントエンドエンジニア向けの交流会です。軽食をとりながら、情報交換やネットワーキングを楽しみましょう。', imageUrl: 'https://picsum.photos/seed/meetup/800/600', isApprovalRequiredForVendors: false, eventType: EventType.SEMINAR_MEETUP },
-  { id: 'event-future-2', name: '秋の手作り市', date: getFutureDate(90), startTime: '10:00', endTime: '16:00', location: '京都府 梅小路公園', description: '温かみのある手作り雑貨やアート作品が勢揃い。作家さんとの会話も楽しみながら、お気に入りの一品を探してみませんか。', imageUrl: 'https://picsum.photos/seed/autumn-market/800/600', isApprovalRequiredForVendors: true, eventType: EventType.MARCHE }
+  { id: 'event-past-1', name: '春のオーガニックマルシェ', date: getPastDate(90), startTime: '10:00', endTime: '17:00', location: '東京都 代々木公園', format: 'offline', googleMapUrl: 'https://goo.gl/maps/1', description: '新鮮なオーガニック野菜や果物、手作りのジャムやパンが並びます。心地よい春の風を感じながら、特別な逸品を見つけに来てください。', imageUrl: 'https://picsum.photos/seed/spring-marche/800/600', isApprovalRequiredForVendors: true, eventType: EventType.MARCHE },
+  { id: 'event-future-1', name: '夏のクラフトフェア', date: getFutureDate(30), startTime: '11:00', endTime: '19:00', location: '神奈川県 赤レンガ倉庫', format: 'offline', googleMapUrl: 'https://goo.gl/maps/2', description: '全国から集まった作家による、個性豊かなアクセサリー、陶器、布小物などが並びます。あなただけのお気に入りを見つけに来てください。', imageUrl: 'https://picsum.photos/seed/craft-fair/800/600', isApprovalRequiredForVendors: true, eventType: EventType.MARCHE },
+  { id: 'event-future-3', name: 'Webデザイナ交流会', date: getFutureDate(45), startTime: '19:00', endTime: '21:00', location: '大阪府 co-working space ABC', format: 'ondemand', googleMapUrl: 'https://goo.gl/maps/3', onlineUrl: 'https://zoom.us/abc', description: 'Webデザイナーやフロントエンドエンジニア向けの交流会です。軽食をとりながら、情報交換やネットワーキングを楽しみましょう。', imageUrl: 'https://picsum.photos/seed/meetup/800/600', isApprovalRequiredForVendors: false, eventType: EventType.SEMINAR_MEETUP },
+  { id: 'event-future-2', name: '秋の手作り市', date: getFutureDate(90), startTime: '10:00', endTime: '16:00', location: '京都府 梅小路公園', format: 'offline', description: '温かみのある手作り雑貨やアート作品が勢揃い。作家さんとの会話も楽しみながら、お気に入りの一品を探してみませんか。', imageUrl: 'https://picsum.photos/seed/autumn-market/800/600', isApprovalRequiredForVendors: true, eventType: EventType.MARCHE }
 ];
 
 const MOCK_EVENT_REGISTRATIONS: EventRegistration[] = [
@@ -100,7 +100,7 @@ const MOCK_REVIEWS: Review[] = [
 
 const MOCK_SERVICES: Service[] = [
     { id: 'service1', providerId: 'provider3', title: 'あなたの未来を占うタロットリーディング', description: '恋愛、仕事、人間関係など、どんなお悩みでもご相談ください。タロットカードがあなたを導きます。', category: ServiceCategory.FORTUNE, price: 3000, imageUrl: 'https://picsum.photos/seed/tarot/400/300', deliveryMethod: 'online', location: '東京都', status: 'open' },
-    { id: 'service2', providerId: 'provider1', title: 'オーダーメイドの記念日ブーケ', description: '誕生日や記念日に、世界で一つだけの特別なブーケをお作りします。色や花の種類などご希望をお聞かせください。', category: ServiceCategory.OTHER, price: 5000, imageUrl: 'https://picsum.photos/seed/bouquet/400/300', deliveryMethod: 'offline', location: '神奈川県', status: 'open' },
+    { id: 'service2', providerId: 'provider1', title: 'オーダーメイドの記念日ブーケ', description: '誕生日や記念日に、世界で一つだけの特別なブーケをお作りします。色や花の種類などご希望をお聞かせください。', category: ServiceCategory.OTHER, price: 5000, imageUrl: 'https://picsum.photos/seed/bouquet/400/300', deliveryMethod: 'offline', location: '神奈川県', googleMapUrl: 'https://goo.gl/maps/123', status: 'open' },
 ];
 
 const MOCK_SERVICE_ORDERS: ServiceOrder[] = [
@@ -170,6 +170,12 @@ const ServiceDetailModal: React.FC<ServiceDetailModalProps> = ({ isOpen, onClose
     }
   };
 
+  const deliveryMethodText = {
+      online: 'オンライン',
+      offline: '対面',
+      ondemand: 'オンデマンド (両方)'
+  };
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="サービス詳細">
       <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
@@ -180,8 +186,15 @@ const ServiceDetailModal: React.FC<ServiceDetailModalProps> = ({ isOpen, onClose
                  <span className="text-xs font-serif font-medium tracking-wide text-indigo-800 bg-indigo-50 border border-indigo-100 px-3 py-1 rounded-sm">{service.category}</span>
                  <h2 className="text-2xl font-bold text-stone-800 mt-3 font-serif tracking-wide">{service.title}</h2>
             </div>
-            <div className="text-xs bg-stone-100 px-2 py-1 rounded text-stone-600 mt-1 whitespace-nowrap">
-                {service.location}
+            <div className="flex items-center text-xs bg-stone-100 px-2 py-1 rounded text-stone-600 mt-1 whitespace-nowrap">
+                <LocationMarkerIcon className="w-3 h-3 mr-1 text-stone-500" />
+                {service.googleMapUrl ? (
+                    <a href={service.googleMapUrl} target="_blank" rel="noopener noreferrer" className="hover:text-teal-700 hover:underline">
+                        {service.location}
+                    </a>
+                ) : (
+                    service.location
+                )}
             </div>
         </div>
 
@@ -199,8 +212,14 @@ const ServiceDetailModal: React.FC<ServiceDetailModalProps> = ({ isOpen, onClose
         </div>
         <div className="space-y-2">
             <h3 className="font-semibold text-stone-700 text-sm">提供方法</h3>
-            <p className="text-stone-600 capitalize text-sm">{service.deliveryMethod === 'both' ? 'オンライン & 対面' : service.deliveryMethod}</p>
+            <p className="text-stone-600 capitalize text-sm">{deliveryMethodText[service.deliveryMethod]}</p>
         </div>
+        {service.address && (
+             <div className="space-y-2">
+                <h3 className="font-semibold text-stone-700 text-sm">住所</h3>
+                <p className="text-stone-600 text-sm">{service.address}</p>
+            </div>
+        )}
 
         {/* Reviews Section */}
         <div className="pt-4 border-t border-stone-100">
@@ -222,7 +241,11 @@ const ServiceDetailModal: React.FC<ServiceDetailModalProps> = ({ isOpen, onClose
                         <div key={review.id} className="bg-stone-50 p-3 rounded border border-stone-100">
                             <div className="flex items-center justify-between mb-1">
                                 <div className="flex items-center gap-2">
-                                    <UserCircleIcon className="w-4 h-4 text-stone-400"/>
+                                     {reviewer?.profileImageUrl ? (
+                                        <img src={reviewer.profileImageUrl} alt={reviewer.name} className="w-6 h-6 rounded-full object-cover" />
+                                     ) : (
+                                        <UserCircleIcon className="w-4 h-4 text-stone-400"/>
+                                     )}
                                     <p className="font-semibold text-xs text-stone-700">{reviewer?.name || '匿名ユーザー'}</p>
                                 </div>
                                 <StarRatingDisplay rating={review.rating} className="w-3 h-3"/>
@@ -490,7 +513,7 @@ const App: React.FC = () => {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>(MOCK_CHAT_MESSAGES);
 
 
-  const [view, setView] = useState<'home' | 'dashboard' | 'serviceList'>('home');
+  const [view, setView] = useState<'home' | 'dashboard'>('home');
   const [isAuthModalOpen, setAuthModalOpen] = useState(false);
   const [isEventFormOpen, setEventFormOpen] = useState(false);
   const [isServiceFormOpen, setServiceFormOpen] = useState(false);
@@ -526,35 +549,43 @@ const App: React.FC = () => {
     if (code) {
         // Backend simulation: Exchange code for access_token, then get profile.
         // For this frontend-only demo, we assume success if 'code' is present.
-        // We will "log in" as a user (creating a new one or picking an existing one).
         
         console.log("LINE Login Code received:", code);
         
-        // Mocking user retrieval. In production, this would be an API call.
-        // Let's assume the user is "member1" (Sato-san) for this simulation, or create a new "LINE User".
-        // To make it distinct, we'll login as member1 but ensure isLineLinked is true.
-        const mockLineUser = users.find(u => u.id === 'member1');
+        // 実際のアプリではバックエンドでトークン交換とユーザー情報の取得・保存を行いますが、
+        // デモ環境では「佐藤さん」ではなく、新規ユーザーを作成してログインさせます。
         
-        if (mockLineUser) {
-            const updatedUser = { ...mockLineUser, isLineLinked: true };
-            // Update user list state
-            setUsers(prev => prev.map(u => u.id === updatedUser.id ? updatedUser : u));
-            setCurrentUser(updatedUser);
-            
-            // Clean the URL
-            window.history.replaceState({}, document.title, window.location.pathname);
-            
-            showMessage('LINEログイン成功', 'LINEアカウントでの認証に成功しました。（シミュレーション）\n公式アカウントと友だち連携が完了している場合、通知が届きます。');
-        }
+        // 仮のLINEユーザーを作成
+        const newUserId = `line_user_${Date.now()}`;
+        const newLineUser: User = {
+            id: newUserId,
+            name: "LINE 太郎", // 仮の名前
+            role: UserRole.MEMBER,
+            isLineLinked: true,
+            // ダミーのアイコン画像
+            profileImageUrl: "https://placehold.co/200x200/06C755/ffffff?text=LINE",
+            lineNotificationSettings: { ...defaultLineSettings },
+        };
+        
+        // Update user list state
+        setUsers(prev => [...prev, newLineUser]);
+        setCurrentUser(newLineUser);
+        
+        // Clean the URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+        
+        showMessage('LINEログイン成功', 'LINEアカウントでの認証に成功しました。\n(デモ環境のため、実際のLINE名は取得できませんが、仮の名前でログインしました)');
     }
-  }, [users]);
+  }, []); // Run only on mount (removed [users] dependency to prevent loop/re-run issues though it was harmless before due to 'code' check)
 
 
   const showMessage = (title: string, message: string) => {
     setGenericModalContent({ title, message });
     setGenericModalOpen(true);
   };
-
+  
+  // ... rest of the component
+  
   const handleLogin = (user: User) => {
     const latestUser = users.find(u => u.id === user.id) || user;
     setCurrentUser(latestUser);
@@ -1133,7 +1164,7 @@ const App: React.FC = () => {
         </main>
     );
   };
-
+  // ... (dashboard rendering remains same with user.profileImageUrl used in profile section)
   const DashboardPage = () => {
     if (!currentUser) return <div className="p-8 text-center text-stone-500">ログインしてください</div>;
 
@@ -1144,6 +1175,17 @@ const App: React.FC = () => {
     const myRegistrations = eventRegistrations.filter(r => r.providerId === currentUser.id);
     const myServices = services.filter(s => s.providerId === currentUser.id);
     const myReceivedServiceOrders = serviceOrders.filter(o => o.providerId === currentUser.id);
+    
+    const [isEditingProfile, setIsEditingProfile] = useState(false);
+    const [editName, setEditName] = useState(currentUser.name);
+
+    const handleSaveProfile = () => {
+        if (!editName.trim()) return;
+        setUsers(prev => prev.map(u => u.id === currentUser.id ? { ...u, name: editName } : u));
+        setCurrentUser(prev => prev ? { ...prev, name: editName } : null);
+        setIsEditingProfile(false);
+        showMessage("プロフィール更新", "ユーザー名を更新しました。");
+    };
 
     return (
       <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -1155,14 +1197,39 @@ const App: React.FC = () => {
              {/* Profile Card */}
              <div className="bg-white rounded shadow-sm p-6 border border-stone-200">
                 <div className="flex items-center space-x-4 mb-4">
-                    <div className="bg-stone-100 p-3 rounded-full">
-                        <UserCircleIcon className="w-8 h-8 text-stone-500" />
+                    <div className="bg-stone-100 p-1 rounded-full shrink-0">
+                        {currentUser.profileImageUrl ? (
+                            <img src={currentUser.profileImageUrl} alt={currentUser.name} className="w-12 h-12 rounded-full object-cover" />
+                        ) : (
+                            <UserCircleIcon className="w-12 h-12 text-stone-500" />
+                        )}
                     </div>
-                    <div>
-                        <h2 className="text-xl font-bold text-stone-800">{currentUser.name}</h2>
-                        <span className="text-xs uppercase bg-stone-100 text-stone-500 px-2 py-1 rounded">{currentUser.role}</span>
+                    <div className="flex-grow min-w-0">
+                        {isEditingProfile ? (
+                            <div className="flex flex-col gap-2">
+                                <input 
+                                    type="text" 
+                                    value={editName} 
+                                    onChange={e => setEditName(e.target.value)} 
+                                    className="border border-stone-300 rounded px-2 py-1 text-sm w-full"
+                                />
+                                <div className="flex gap-2">
+                                    <button onClick={handleSaveProfile} className="bg-teal-600 text-white px-2 py-1 rounded text-xs hover:bg-teal-700">保存</button>
+                                    <button onClick={() => { setIsEditingProfile(false); setEditName(currentUser.name); }} className="bg-stone-200 text-stone-700 px-2 py-1 rounded text-xs hover:bg-stone-300">取消</button>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="flex items-center justify-between">
+                                <h2 className="text-xl font-bold text-stone-800 truncate">{currentUser.name}</h2>
+                                <button onClick={() => setIsEditingProfile(true)} className="text-stone-400 hover:text-teal-600 ml-2">
+                                    <EditIcon className="w-4 h-4"/>
+                                </button>
+                            </div>
+                        )}
+                        <span className="text-xs uppercase bg-stone-100 text-stone-500 px-2 py-1 rounded inline-block mt-1">{currentUser.role}</span>
                     </div>
                 </div>
+                {/* ... (rest of profile card) */}
                 
                 {/* LINE Settings */}
                 <div className="border-t border-stone-100 pt-4 mt-4">
@@ -1441,7 +1508,7 @@ const App: React.FC = () => {
       {view === 'dashboard' && <DashboardPage />}
 
       <Footer />
-
+      {/* ... (Modals remain same) */}
       <AuthModal
         isOpen={isAuthModalOpen}
         onClose={() => setAuthModalOpen(false)}

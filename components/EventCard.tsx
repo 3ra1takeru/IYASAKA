@@ -79,6 +79,9 @@ const EventCard: React.FC<EventCardProps> = ({ event, user, reservations, provid
         <img src={event.imageUrl} alt={event.name} className="w-full h-52 object-cover" />
         <div className="absolute top-0 right-0 bg-white/90 backdrop-blur px-3 py-1 m-2 text-xs font-serif tracking-widest border border-stone-200">
             {event.eventType === EventType.MARCHE ? 'マルシェ' : '交流会・講座'}
+            <span className="ml-2 px-1 bg-stone-100 rounded text-stone-600">
+                {event.format === 'online' ? 'オンライン' : event.format === 'ondemand' ? 'オンデマンド' : 'オフライン'}
+            </span>
         </div>
       </div>
       <div className="p-6 flex flex-col flex-grow">
@@ -90,7 +93,13 @@ const EventCard: React.FC<EventCardProps> = ({ event, user, reservations, provid
             </div>
             <div className="flex items-center text-stone-600 text-sm">
                 <LocationMarkerIcon className="w-4 h-4 mr-2 text-teal-700" />
-                <span className="tracking-wide">{event.location}</span>
+                {event.googleMapUrl ? (
+                    <a href={event.googleMapUrl} target="_blank" rel="noopener noreferrer" className="tracking-wide hover:text-teal-700 hover:underline">
+                        {event.location}
+                    </a>
+                ) : (
+                    <span className="tracking-wide">{event.location}</span>
+                )}
             </div>
         </div>
         <p className="text-stone-600 leading-relaxed mb-6 text-sm flex-grow font-light">{event.description}</p>

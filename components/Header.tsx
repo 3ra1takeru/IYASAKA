@@ -32,8 +32,12 @@ const Header: React.FC<HeaderProps> = ({ user, onLoginClick, onLogoutClick, onCr
           <div className="flex items-center gap-2 sm:gap-4">
             {user ? (
               <>
-                <div className="hidden lg:flex items-center mr-2 bg-stone-100 rounded-full px-4 py-1">
-                   <UserCircleIcon className="w-5 h-5 text-stone-500 mr-2"/>
+                <div className="hidden lg:flex items-center mr-2 bg-stone-100 rounded-full pl-2 pr-4 py-1 border border-stone-200">
+                   {user.profileImageUrl ? (
+                       <img src={user.profileImageUrl} alt={user.name} className="w-6 h-6 rounded-full object-cover mr-2" />
+                   ) : (
+                       <UserCircleIcon className="w-6 h-6 text-stone-500 mr-2"/>
+                   )}
                    <span className="text-stone-700 font-medium truncate max-w-[150px] text-sm tracking-wide">{user.name} 様</span>
                 </div>
                 <button

@@ -1,4 +1,3 @@
-
 import { GoogleGenAI } from "@google/genai";
 
 const API_KEY = process.env.API_KEY;
@@ -18,7 +17,7 @@ export const generateEventDescription = async (keywords: string): Promise<string
 キーワード: 「${keywords}」`;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3-flash-preview',
       contents: prompt,
     });
     
@@ -38,7 +37,7 @@ export const generateServiceDescription = async (keywords: string): Promise<stri
 キーワード: 「${keywords}」`;
 
         const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
+            model: 'gemini-3-flash-preview',
             contents: prompt,
         });
 

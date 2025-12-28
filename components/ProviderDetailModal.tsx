@@ -213,7 +213,11 @@ const ProviderDetailModal: React.FC<ProviderDetailModalProps> = ({ isOpen, onClo
                                 <div key={review.id} className="bg-stone-50 p-3 rounded-md">
                                     <div className="flex items-center justify-between mb-1">
                                         <div className="flex items-center gap-2">
-                                            <UserCircleIcon className="w-5 h-5 text-stone-400"/>
+                                            {reviewer?.profileImageUrl ? (
+                                                <img src={reviewer.profileImageUrl} alt={reviewer.name} className="w-6 h-6 rounded-full object-cover" />
+                                            ) : (
+                                                <UserCircleIcon className="w-5 h-5 text-stone-400"/>
+                                            )}
                                             <p className="font-semibold text-sm text-stone-700">{reviewer?.name || '匿名ユーザー'}</p>
                                         </div>
                                         <StarRatingDisplay rating={review.rating} className="w-4 h-4"/>

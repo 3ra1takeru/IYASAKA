@@ -17,9 +17,15 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service, provider, onSelect }
         <span className="absolute top-2 left-2 text-xs font-medium tracking-wider text-white bg-stone-800/80 px-3 py-1 rounded-sm backdrop-blur-sm border border-white/20">
             {service.category}
         </span>
-        <div className="absolute bottom-2 right-2 bg-white/90 backdrop-blur px-2 py-0.5 rounded text-xs text-stone-600 flex items-center shadow-sm">
+        <div className="absolute bottom-2 right-2 bg-white/90 backdrop-blur px-2 py-0.5 rounded text-xs text-stone-600 flex items-center shadow-sm z-10">
             <LocationMarkerIcon className="w-3 h-3 mr-1 text-teal-600"/>
-            {service.location}
+            {service.googleMapUrl ? (
+                <a href={service.googleMapUrl} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} className="hover:text-teal-800 hover:underline">
+                    {service.location}
+                </a>
+            ) : (
+                service.location
+            )}
         </div>
       </div>
       <div className="p-6 flex flex-col flex-grow">

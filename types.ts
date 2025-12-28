@@ -10,6 +10,7 @@ export interface User {
   name: string;
   role: UserRole;
   instagramId?: string;
+  profileImageUrl?: string; // 追加
   isLineLinked?: boolean;
   lineNotificationSettings?: {
     eventReservations: boolean;
@@ -37,7 +38,11 @@ export interface Event {
   date: string;
   startTime: string;
   endTime: string;
-  location: string;
+  location: string; // 会場名
+  address?: string; // 詳細住所
+  googleMapUrl?: string; // Google Map URL
+  onlineUrl?: string; // Zoom URL etc
+  format: 'online' | 'offline' | 'ondemand';
   description: string;
   imageUrl: string;
   isApprovalRequiredForVendors: boolean;
@@ -127,8 +132,11 @@ export interface Service {
     category: ServiceCategory;
     price: number;
     imageUrl: string;
-    deliveryMethod: 'online' | 'offline' | 'both';
-    location: string; // 都道府県を追加
+    deliveryMethod: 'online' | 'offline' | 'ondemand'; // both -> ondemand
+    location: string; // 都道府県
+    address?: string; // 詳細住所（対面の場合）
+    googleMapUrl?: string; // Google Map URL
+    meetingUrl?: string; // 会議URL（オンラインの場合）
     status: 'open' | 'closed';
 }
 
