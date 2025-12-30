@@ -77,10 +77,10 @@ const PREFECTURES = [
 ];
 
 const MOCK_EVENTS: Event[] = [
-  { id: 'event-past-1', ownerId: 'organizer1', name: '春のオーガニックマルシェ', date: getPastDate(90), startTime: '10:00', endTime: '17:00', location: '東京都 代々木公園', format: 'offline', googleMapUrl: 'https://goo.gl/maps/1', description: '新鮮なオーガニック野菜や果物、手作りのジャムやパンが並びます。心地よい春の風を感じながら、特別な逸品を見つけに来てください。', imageUrl: 'https://picsum.photos/seed/spring-marche/800/600', isApprovalRequiredForVendors: true, eventType: EventType.MARCHE },
-  { id: 'event-future-1', ownerId: 'organizer1', name: '夏のクラフトフェア', date: getFutureDate(30), startTime: '11:00', endTime: '19:00', location: '神奈川県 赤レンガ倉庫', format: 'offline', googleMapUrl: 'https://goo.gl/maps/2', description: '全国から集まった作家による、個性豊かなアクセサリー、陶器、布小物などが並びます。あなただけのお気に入りを見つけに来てください。', imageUrl: 'https://picsum.photos/seed/craft-fair/800/600', isApprovalRequiredForVendors: true, eventType: EventType.MARCHE },
-  { id: 'event-future-3', ownerId: 'organizer1', name: 'Webデザイナ交流会', date: getFutureDate(45), startTime: '19:00', endTime: '21:00', location: '大阪府 co-working space ABC', format: 'ondemand', googleMapUrl: 'https://goo.gl/maps/3', onlineUrl: 'https://zoom.us/abc', description: 'Webデザイナーやフロントエンドエンジニア向けの交流会です。軽食をとりながら、情報交換やネットワーキングを楽しみましょう。', imageUrl: 'https://picsum.photos/seed/meetup/800/600', isApprovalRequiredForVendors: false, eventType: EventType.SEMINAR_MEETUP },
-  { id: 'event-future-2', ownerId: 'organizer1', name: '秋の手作り市', date: getFutureDate(90), startTime: '10:00', endTime: '16:00', location: '京都府 梅小路公園', format: 'offline', description: '温かみのある手作り雑貨やアート作品が勢揃い。作家さんとの会話も楽しみながら、お気に入りの一品を探してみませんか。', imageUrl: 'https://picsum.photos/seed/autumn-market/800/600', isApprovalRequiredForVendors: true, eventType: EventType.MARCHE }
+  { id: 'event-past-1', ownerId: 'organizer1', name: '春のオーガニックマルシェ', date: getPastDate(90), startTime: '10:00', endTime: '17:00', location: '東京都 代々木公園', format: 'offline', googleMapUrl: 'https://goo.gl/maps/1', description: '新鮮なオーガニック野菜や果物、手作りのジャムやパンが並びます。心地よい春の風を感じながら、特別な逸品を見つけに来てください。', imageUrl: 'https://picsum.photos/seed/spring-marche/800/600', isApprovalRequiredForVendors: true, eventType: EventType.MARCHE, vendorLimits: 30 },
+  { id: 'event-future-1', ownerId: 'organizer1', name: '夏のクラフトフェア', date: getFutureDate(30), startTime: '11:00', endTime: '19:00', location: '神奈川県 赤レンガ倉庫', format: 'offline', googleMapUrl: 'https://goo.gl/maps/2', description: '全国から集まった作家による、個性豊かなアクセサリー、陶器、布小物などが並びます。あなただけのお気に入りを見つけに来てください。', imageUrl: 'https://picsum.photos/seed/craft-fair/800/600', isApprovalRequiredForVendors: true, eventType: EventType.MARCHE, vendorLimits: 50 },
+  { id: 'event-future-3', ownerId: 'organizer1', name: 'Webデザイナ交流会', date: getFutureDate(45), startTime: '19:00', endTime: '21:00', location: '大阪府 co-working space ABC', format: 'ondemand', googleMapUrl: 'https://goo.gl/maps/3', onlineUrl: 'https://zoom.us/abc', description: 'Webデザイナーやフロントエンドエンジニア向けの交流会です。軽食をとりながら、情報交換やネットワーキングを楽しみましょう。', imageUrl: 'https://picsum.photos/seed/meetup/800/600', isApprovalRequiredForVendors: false, eventType: EventType.SEMINAR_MEETUP, attendeeLimits: 20 },
+  { id: 'event-future-2', ownerId: 'organizer1', name: '秋の手作り市', date: getFutureDate(90), startTime: '10:00', endTime: '16:00', location: '京都府 梅小路公園', format: 'offline', description: '温かみのある手作り雑貨やアート作品が勢揃い。作家さんとの会話も楽しみながら、お気に入りの一品を探してみませんか。', imageUrl: 'https://picsum.photos/seed/autumn-market/800/600', isApprovalRequiredForVendors: true, eventType: EventType.MARCHE, vendorLimits: 20 }
 ];
 
 const MOCK_EVENT_REGISTRATIONS: EventRegistration[] = [
@@ -113,9 +113,9 @@ const MOCK_SERVICE_REVIEWS: ServiceReview[] = [
 ];
 
 const MOCK_CHAT_MESSAGES: ChatMessage[] = [
-    { id: 'msg1', orderId: 'order1', senderId: 'member1', receiverId: 'provider1', message: 'こんにちは！ブーケの件でご相談です。記念日のプレゼントで、ピンク色を基調とした華やかな雰囲気でお願いしたいのですが、ご予算5000円で可能でしょうか？', createdAt: new Date(new Date(getPastDate(2)).getTime() + 1000 * 60 * 5).toISOString() },
-    { id: 'msg2', orderId: 'order1', senderId: 'provider1', receiverId: 'member1', message: '佐藤さん、こんにちは！ご相談ありがとうございます。もちろんです、ご予算5000円で素敵なブーケをお作りしますよ。ピンクのバラやガーベラをメインに、季節の小花を添えるのはいかがでしょうか？', createdAt: new Date(new Date(getPastDate(2)).getTime() + 1000 * 60 * 15).toISOString() },
-    { id: 'msg3', orderId: 'order1', senderId: 'member1', receiverId: 'provider1', message: 'ありがとうございます！ぜひその内容でお願いします。とても楽しみです。', createdAt: new Date(new Date(getPastDate(2)).getTime() + 1000 * 60 * 20).toISOString() },
+    { id: 'msg1', orderId: 'order1', senderId: 'member1', receiverId: 'provider1', message: 'こんにちは！ブーケの件でご相談です。記念日のプレゼントで、ピンク色を基調とした華やかな雰囲気でお願いしたいのですが、ご予算5000円で可能でしょうか？', createdAt: new Date(new Date(getPastDate(2)).getTime() + 1000 * 60 * 5).toISOString(), isRead: true },
+    { id: 'msg2', orderId: 'order1', senderId: 'provider1', receiverId: 'member1', message: '佐藤さん、こんにちは！ご相談ありがとうございます。もちろんです、ご予算5000円で素敵なブーケをお作りしますよ。ピンクのバラやガーベラをメインに、季節の小花を添えるのはいかがでしょうか？', createdAt: new Date(new Date(getPastDate(2)).getTime() + 1000 * 60 * 15).toISOString(), isRead: true },
+    { id: 'msg3', orderId: 'order1', senderId: 'member1', receiverId: 'provider1', message: 'ありがとうございます！ぜひその内容でお願いします。とても楽しみです。', createdAt: new Date(new Date(getPastDate(2)).getTime() + 1000 * 60 * 20).toISOString(), isRead: true },
 ];
 
 
@@ -397,6 +397,7 @@ const ChatModal: React.FC<ChatModalProps> = ({ isOpen, onClose, session, current
                   <p className="text-sm">{msg.message}</p>
                   <p className={`text-xs mt-1 ${isMyMessage ? 'text-indigo-200' : 'text-stone-400'} text-right`}>
                     {new Date(msg.createdAt).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}
+                    {isMyMessage && msg.isRead && <span className="ml-1 text-indigo-300">既読</span>}
                   </p>
                 </div>
               </div>
@@ -624,6 +625,14 @@ const App: React.FC = () => {
   const [searchType, setSearchType] = useState<'events' | 'services'>('events');
 
   const receivedBookings = currentUser ? timeSlotBookings.filter(b => b.providerId === currentUser.id) : [];
+
+  // Notification Logic
+  const unreadMessagesCount = currentUser ? chatMessages.filter(m => m.receiverId === currentUser.id && !m.isRead).length : 0;
+  const pendingServiceOrdersCount = currentUser && currentUser.role === UserRole.PROVIDER 
+      ? serviceOrders.filter(o => o.providerId === currentUser.id && o.status === 'requested').length 
+      : 0;
+  
+  const hasUnreadNotifications = unreadMessagesCount > 0 || pendingServiceOrdersCount > 0;
 
 
   // --- Handle LINE Login Callback ---
@@ -941,6 +950,15 @@ const App: React.FC = () => {
   const handleOpenChat = (session: ChatSession) => {
     setSelectedChatSession(session);
     setChatModalOpen(true);
+    
+    // Mark messages as read
+    if (currentUser) {
+        setChatMessages(prev => prev.map(msg => 
+            (msg.orderId === session.id && msg.receiverId === currentUser.id && !msg.isRead) 
+            ? { ...msg, isRead: true } 
+            : msg
+        ));
+    }
   };
   
   const handleSendMessage = (sessionId: string, messageText: string) => {
@@ -953,6 +971,7 @@ const App: React.FC = () => {
       receiverId: currentUser.id === selectedChatSession.providerId ? selectedChatSession.buyerId : selectedChatSession.providerId,
       message: messageText,
       createdAt: new Date().toISOString(),
+      isRead: false,
     };
     setChatMessages(prev => [...prev, newMessage]);
   };
@@ -1416,23 +1435,37 @@ const App: React.FC = () => {
             
             {/* Notifications / Messages */}
             <div className="bg-white rounded shadow-sm p-6 border border-stone-200">
-                 <h2 className="text-xl font-bold text-stone-800 mb-4 font-serif">メッセージ / 通知</h2>
+                 <div className="flex items-center gap-2 mb-4">
+                     <h2 className="text-xl font-bold text-stone-800 font-serif">メッセージ / 通知</h2>
+                     {hasUnreadNotifications && (
+                         <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">New</span>
+                     )}
+                 </div>
                  <div className="space-y-2">
                     {/* Service Orders */}
-                    {[...myServiceOrdersAsBuyer, ...myReceivedServiceOrders].filter(o => o.status !== 'completed' && o.status !== 'cancelled').map(order => {
+                    {/* Fixed: Removed .filter(o => o.status !== 'completed' ...) to show history, preventing lost messages */}
+                    {[...myServiceOrdersAsBuyer, ...myReceivedServiceOrders].filter(o => o.status !== 'cancelled').sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).map(order => {
                          const service = services.find(s => s.id === order.serviceId);
                          const otherUser = currentUser.id === order.buyerId 
                             ? providers.find(p => p.id === order.providerId)?.providerName 
                             : users.find(u => u.id === order.buyerId)?.name;
                          
+                         const unreadCount = chatMessages.filter(m => m.orderId === order.id && m.receiverId === currentUser.id && !m.isRead).length;
+                         const isPendingRequest = currentUser.id === order.providerId && order.status === 'requested';
+
                          return (
-                             <div key={order.id} className="p-3 bg-indigo-50 border border-indigo-100 rounded flex justify-between items-center">
+                             <div key={order.id} className="p-3 bg-indigo-50 border border-indigo-100 rounded flex justify-between items-center relative">
                                  <div>
-                                     <p className="text-sm font-semibold text-indigo-900">{service?.title}</p>
+                                     <div className="flex items-center gap-2">
+                                         <p className="text-sm font-semibold text-indigo-900">{service?.title}</p>
+                                         {isPendingRequest && <span className="bg-yellow-500 text-white text-[10px] px-1.5 py-0.5 rounded-sm font-bold">新規依頼</span>}
+                                         {unreadCount > 0 && <span className="bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">{unreadCount}</span>}
+                                     </div>
                                      <p className="text-xs text-indigo-700">相手: {otherUser} | ステータス: {renderServiceStatus(order.status)}</p>
                                  </div>
-                                 <button onClick={() => handleOpenChat({ id: order.id, providerId: order.providerId, buyerId: order.buyerId, title: service?.title || 'サービス' })} className="text-indigo-600 hover:text-indigo-800">
-                                     <ChatBubbleIcon className="w-5 h-5" />
+                                 <button onClick={() => handleOpenChat({ id: order.id, providerId: order.providerId, buyerId: order.buyerId, title: service?.title || 'サービス' })} className="text-indigo-600 hover:text-indigo-800 relative">
+                                     <ChatBubbleIcon className="w-6 h-6" />
+                                     {unreadCount > 0 && <span className="absolute -top-1 -right-1 block h-2.5 w-2.5 rounded-full ring-2 ring-white bg-red-500" />}
                                  </button>
                              </div>
                          )
@@ -1659,6 +1692,7 @@ const App: React.FC = () => {
         onDashboardClick={() => setView('dashboard')}
         onHomeClick={() => { setView('home'); setSearchType('events'); }}
         onServiceListClick={() => { setView('home'); setSearchType('services'); }}
+        hasUnreadNotifications={hasUnreadNotifications}
       />
       {view === 'home' && <HomePage />}
       {view === 'dashboard' && <DashboardPage />}

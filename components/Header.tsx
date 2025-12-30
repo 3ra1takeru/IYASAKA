@@ -12,9 +12,10 @@ interface HeaderProps {
   onDashboardClick: () => void;
   onHomeClick: () => void;
   onServiceListClick: () => void;
+  hasUnreadNotifications?: boolean; // 追加
 }
 
-const Header: React.FC<HeaderProps> = ({ user, onLoginClick, onLogoutClick, onCreateEventClick, onCreateServiceClick, onDashboardClick, onHomeClick, onServiceListClick }) => {
+const Header: React.FC<HeaderProps> = ({ user, onLoginClick, onLogoutClick, onCreateEventClick, onCreateServiceClick, onDashboardClick, onHomeClick, onServiceListClick, hasUnreadNotifications = false }) => {
   return (
     <header className="bg-white/90 backdrop-blur-md shadow-sm border-b border-stone-200 sticky top-0 z-40">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -42,10 +43,13 @@ const Header: React.FC<HeaderProps> = ({ user, onLoginClick, onLogoutClick, onCr
                 </div>
                 <button
                     onClick={onDashboardClick}
-                    className="flex items-center justify-center text-stone-600 hover:text-stone-900 p-2 transition-colors duration-200"
+                    className="flex items-center justify-center text-stone-600 hover:text-stone-900 p-2 transition-colors duration-200 relative"
                     title="マイページ"
                 >
                     <DashboardIcon className="w-6 h-6" />
+                    {hasUnreadNotifications && (
+                        <span className="absolute top-1.5 right-1.5 block h-2.5 w-2.5 rounded-full ring-2 ring-white bg-red-500 animate-pulse" />
+                    )}
                 </button>
                 {(user.role === UserRole.ADMIN || user.role === UserRole.PROVIDER) && (
                   <>

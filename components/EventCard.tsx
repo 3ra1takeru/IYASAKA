@@ -112,6 +112,19 @@ const EventCard: React.FC<EventCardProps> = ({ event, user, reservations, provid
                     <span className="tracking-wide">{event.location}</span>
                 )}
             </div>
+            {/* 人数制限の表示 */}
+            {event.eventType === EventType.MARCHE && event.vendorLimits && (
+                <div className="flex items-center text-stone-600 text-sm">
+                    <StoreIcon className="w-4 h-4 mr-2 text-teal-700" />
+                    <span className="tracking-wide">募集: {event.vendorLimits}店舗</span>
+                </div>
+            )}
+            {event.eventType === EventType.SEMINAR_MEETUP && event.attendeeLimits && (
+                <div className="flex items-center text-stone-600 text-sm">
+                    <UsersIcon className="w-4 h-4 mr-2 text-teal-700" />
+                    <span className="tracking-wide">定員: {event.attendeeLimits}名</span>
+                </div>
+            )}
         </div>
         <p className="text-stone-600 leading-relaxed mb-6 text-sm flex-grow font-light">{event.description}</p>
 

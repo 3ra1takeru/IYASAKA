@@ -48,6 +48,8 @@ export interface Event {
   imageUrl: string;
   isApprovalRequiredForVendors: boolean;
   eventType: EventType;
+  vendorLimits?: number; // 追加: 出展者募集数
+  attendeeLimits?: number; // 追加: 参加者定員
 }
 
 export enum RegistrationStatus {
@@ -167,4 +169,5 @@ export interface ChatMessage {
     receiverId: string; // Will be a userId
     message: string;
     createdAt: string; // ISO string
+    isRead: boolean; // 追加
 }

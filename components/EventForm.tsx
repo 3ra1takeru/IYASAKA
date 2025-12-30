@@ -1,6 +1,8 @@
 
 import React, { useState } from 'react';
 import { Event, EventType } from '../types';
+import { generateEventDescription } from '../services/geminiService';
+import { SparklesIcon } from './icons';
 
 interface EventFormProps {
   onAddEvent: (event: Omit<Event, 'id'>) => void;
@@ -22,6 +24,21 @@ const EventForm: React.FC<EventFormProps> = ({ onAddEvent, onClose }) => {
   const [description, setDescription] = useState('');
   const [isApprovalRequired, setIsApprovalRequired] = useState(true);
   const [eventType, setEventType] = useState<EventType>(EventType.MARCHE);
+  
+  const [limit, setLimit] = useState<string>(''); // 定員・募集数の入力用
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  const handleGenerateDescription = async () => {
+    if (!name && !location) {
+      alert("イベント名または開催場所を入力してください。");
+      return;
+    }
+    setIsGenerating(true);
+    const keywords = `${name} ${location} ${eventType === EventType.MARCHE ? 'マルシェ 市場' : 'セミナー 交流会'}`;
+    const generatedText = await generateEventDescription(keywords);
+    setDescription(generatedText);
+    setIsGenerating(false);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,6 +71,8 @@ const EventForm: React.FC<EventFormProps> = ({ onAddEvent, onClose }) => {
       imageUrl: `https://picsum.photos/seed/${name}/800/600`,
       isApprovalRequiredForVendors: eventType === EventType.MARCHE ? isApprovalRequired : false,
       eventType,
+      vendorLimits: eventType === EventType.MARCHE && limit ? parseInt(limit, 10) : undefined,
+      attendeeLimits: eventType === EventType.SEMINAR_MEETUP && limit ? parseInt(limit, 10) : undefined,
     });
     onClose();
   };
@@ -63,123 +82,123 @@ const EventForm: React.FC<EventFormProps> = ({ onAddEvent, onClose }) => {
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <label className="block text-sm font-medium text-stone-700">イベント名*</label>
-        <input type="text" value={name} onChange={(e) => setName(e.target.value)} required className="mt-1 block w-full px-3 py-2 bg-white border border-stone-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"/>
+        <input type="text" value={name} onChange={(e) => setName(e.target.value)} required className="mt-1 block w-full px-3 py-2 bg-white border border-stone-300 rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500" placeholder="例：春のパン祭りマルシェ"/>
       </div>
       
-       <div>
-        <label className="block text-sm font-medium text-stone-700 mb-1">イベントタイプ*</label>
-        <div className="flex space-x-4">
-          <label className="flex items-center space-x-2 cursor-pointer">
-            <input 
-              type="radio" 
-              name="eventType"
-              value={EventType.MARCHE}
-              checked={eventType === EventType.MARCHE}
-              onChange={(e) => setEventType(e.target.value as EventType)}
-              className="h-4 w-4 text-green-600 focus:ring-green-500 border-stone-300"
-            />
-            <span className="text-sm font-medium text-stone-700">マルシェ (出展者あり)</span>
-          </label>
-          <label className="flex items-center space-x-2 cursor-pointer">
-            <input 
-              type="radio" 
-              name="eventType"
-              value={EventType.SEMINAR_MEETUP}
-              checked={eventType === EventType.SEMINAR_MEETUP}
-              onChange={(e) => setEventType(e.target.value as EventType)}
-              className="h-4 w-4 text-green-600 focus:ring-green-500 border-stone-300"
-            />
-            <span className="text-sm font-medium text-stone-700">セミナー/交流会 (出展者なし)</span>
-          </label>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+            <label className="block text-sm font-medium text-stone-700">開催日*</label>
+            <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required className="mt-1 block w-full px-3 py-2 bg-white border border-stone-300 rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500"/>
+        </div>
+        <div className="flex space-x-2">
+            <div className="flex-1">
+                <label className="block text-sm font-medium text-stone-700">開始*</label>
+                <input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} required className="mt-1 block w-full px-3 py-2 bg-white border border-stone-300 rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500"/>
+            </div>
+            <div className="flex-1">
+                 <label className="block text-sm font-medium text-stone-700">終了*</label>
+                 <input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} required className="mt-1 block w-full px-3 py-2 bg-white border border-stone-300 rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500"/>
+            </div>
         </div>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-stone-700 mb-1">開催形式*</label>
-        <div className="flex space-x-4">
-          <label className="flex items-center space-x-2 cursor-pointer">
-            <input type="radio" value="offline" checked={format === 'offline'} onChange={() => setFormat('offline')} className="h-4 w-4 text-green-600 focus:ring-green-500 border-stone-300"/>
-            <span className="text-sm text-stone-700">オフライン</span>
-          </label>
-          <label className="flex items-center space-x-2 cursor-pointer">
-            <input type="radio" value="online" checked={format === 'online'} onChange={() => setFormat('online')} className="h-4 w-4 text-green-600 focus:ring-green-500 border-stone-300"/>
-            <span className="text-sm text-stone-700">オンライン</span>
-          </label>
-           <label className="flex items-center space-x-2 cursor-pointer">
-            <input type="radio" value="ondemand" checked={format === 'ondemand'} onChange={() => setFormat('ondemand')} className="h-4 w-4 text-green-600 focus:ring-green-500 border-stone-300"/>
-            <span className="text-sm text-stone-700">オンデマンド (両方)</span>
-          </label>
+        <label className="block text-sm font-medium text-stone-700">イベントタイプ*</label>
+        <div className="flex space-x-4 mt-2">
+             <label className="flex items-center cursor-pointer">
+                <input type="radio" value={EventType.MARCHE} checked={eventType === EventType.MARCHE} onChange={() => setEventType(EventType.MARCHE)} className="h-4 w-4 text-teal-600 focus:ring-teal-500 border-stone-300"/>
+                <span className="ml-2 text-sm text-stone-700">マルシェ・市場</span>
+            </label>
+            <label className="flex items-center cursor-pointer">
+                <input type="radio" value={EventType.SEMINAR_MEETUP} checked={eventType === EventType.SEMINAR_MEETUP} onChange={() => setEventType(EventType.SEMINAR_MEETUP)} className="h-4 w-4 text-teal-600 focus:ring-teal-500 border-stone-300"/>
+                <span className="ml-2 text-sm text-stone-700">セミナー・交流会</span>
+            </label>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-            <label className="block text-sm font-medium text-stone-700">開催日*</label>
-            <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required className="mt-1 block w-full px-3 py-2 bg-white border border-stone-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"/>
-        </div>
-        <div className="grid grid-cols-2 gap-2">
-            <div>
-                <label className="block text-sm font-medium text-stone-700">開始時刻*</label>
-                <input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} required className="mt-1 block w-full px-3 py-2 bg-white border border-stone-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"/>
-            </div>
-            <div>
-                <label className="block text-sm font-medium text-stone-700">終了時刻*</label>
-                <input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} required className="mt-1 block w-full px-3 py-2 bg-white border border-stone-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"/>
-            </div>
+      <div>
+          <label className="block text-sm font-medium text-stone-700">
+              {eventType === EventType.MARCHE ? '募集出展者数 (店舗)' : '参加定員 (名)'}
+          </label>
+          <input 
+            type="number" 
+            value={limit} 
+            onChange={(e) => setLimit(e.target.value)} 
+            min="1"
+            className="mt-1 block w-32 px-3 py-2 bg-white border border-stone-300 rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500" 
+            placeholder={eventType === EventType.MARCHE ? '例：20' : '例：50'}
+          />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-stone-700">開催形式*</label>
+        <div className="flex space-x-4 mt-2">
+             <label className="flex items-center cursor-pointer">
+                <input type="radio" value="offline" checked={format === 'offline'} onChange={(e) => setFormat(e.target.value as any)} className="h-4 w-4 text-teal-600 focus:ring-teal-500 border-stone-300"/>
+                <span className="ml-2 text-sm text-stone-700">オフライン(現地)</span>
+            </label>
+            <label className="flex items-center cursor-pointer">
+                <input type="radio" value="online" checked={format === 'online'} onChange={(e) => setFormat(e.target.value as any)} className="h-4 w-4 text-teal-600 focus:ring-teal-500 border-stone-300"/>
+                <span className="ml-2 text-sm text-stone-700">オンライン</span>
+            </label>
+            <label className="flex items-center cursor-pointer">
+                <input type="radio" value="ondemand" checked={format === 'ondemand'} onChange={(e) => setFormat(e.target.value as any)} className="h-4 w-4 text-teal-600 focus:ring-teal-500 border-stone-300"/>
+                <span className="ml-2 text-sm text-stone-700">オンデマンド(両方)</span>
+            </label>
         </div>
       </div>
 
       {(format === 'offline' || format === 'ondemand') && (
-        <div className="space-y-3 bg-stone-50 p-3 rounded border border-stone-200">
-             <h4 className="text-sm font-semibold text-stone-700">会場情報</h4>
-            <div>
-                <label className="block text-sm font-medium text-stone-700">開催場所 (会場名)*</label>
-                <input type="text" value={location} onChange={(e) => setLocation(e.target.value)} required placeholder="例: 代々木公園、〇〇会館" className="mt-1 block w-full px-3 py-2 bg-white border border-stone-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"/>
-            </div>
-            <div>
-                <label className="block text-sm font-medium text-stone-700">住所</label>
-                <input type="text" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="例: 東京都渋谷区..." className="mt-1 block w-full px-3 py-2 bg-white border border-stone-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"/>
-            </div>
+         <div className="space-y-4 bg-stone-50 p-3 rounded-md border border-stone-200">
+             <h4 className="text-sm font-semibold text-stone-700">開催場所の情報</h4>
+             <div>
+                <label className="block text-sm font-medium text-stone-700">会場名*</label>
+                <input type="text" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="例：代々木公園 イベント広場" className="mt-1 block w-full px-3 py-2 bg-white border border-stone-300 rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500"/>
+             </div>
+              <div>
+                <label className="block text-sm font-medium text-stone-700">詳細住所</label>
+                <input type="text" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="例：東京都渋谷区代々木神園町2-1" className="mt-1 block w-full px-3 py-2 bg-white border border-stone-300 rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500"/>
+             </div>
              <div>
                 <label className="block text-sm font-medium text-stone-700">Google Map URL</label>
-                <input type="url" value={googleMapUrl} onChange={(e) => setGoogleMapUrl(e.target.value)} placeholder="https://goo.gl/maps/..." className="mt-1 block w-full px-3 py-2 bg-white border border-stone-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"/>
-            </div>
-        </div>
+                <input type="url" value={googleMapUrl} onChange={(e) => setGoogleMapUrl(e.target.value)} placeholder="https://goo.gl/maps/..." className="mt-1 block w-full px-3 py-2 bg-white border border-stone-300 rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500"/>
+             </div>
+         </div>
       )}
 
       {(format === 'online' || format === 'ondemand') && (
-          <div className="bg-stone-50 p-3 rounded border border-stone-200">
-            <h4 className="text-sm font-semibold text-stone-700 mb-2">オンライン接続情報</h4>
-            <div>
-                <label className="block text-sm font-medium text-stone-700">配信URL / 会議URL (Zoom等)*</label>
-                <input type="url" value={onlineUrl} onChange={(e) => setOnlineUrl(e.target.value)} required placeholder="https://zoom.us/j/..." className="mt-1 block w-full px-3 py-2 bg-white border border-stone-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"/>
-                <p className="text-xs text-stone-500 mt-1">※ 参加者（予約者）にのみ表示されます（シミュレーション）。</p>
-            </div>
-          </div>
+        <div>
+            <label className="block text-sm font-medium text-stone-700">オンライン参加URL*</label>
+            <input type="url" value={onlineUrl} onChange={(e) => setOnlineUrl(e.target.value)} placeholder="https://zoom.us/j/..." className="mt-1 block w-full px-3 py-2 bg-white border border-stone-300 rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500"/>
+        </div>
       )}
-        
-        {eventType === EventType.MARCHE && (
-          <div>
-              <label className="flex items-center space-x-2 cursor-pointer">
-                  <input 
-                      type="checkbox" 
-                      checked={isApprovalRequired} 
-                      onChange={(e) => setIsApprovalRequired(e.target.checked)}
-                      className="h-4 w-4 rounded border-stone-300 text-green-600 focus:ring-green-500"
-                  />
-                  <span className="text-sm font-medium text-stone-700">出展申込の承認制を有効にする</span>
-              </label>
-              <p className="text-xs text-stone-500 ml-6">チェックを外すと、出展申込は自動的に承認されます。</p>
-          </div>
-        )}
 
       <div>
-        <label className="block text-sm font-medium text-stone-700">イベント説明*</label>
-        <textarea value={description} onChange={(e) => setDescription(e.target.value)} required rows={5} className="mt-1 block w-full px-3 py-2 bg-white border border-stone-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"/>
+        <div className="flex justify-between items-center mb-1">
+            <label className="block text-sm font-medium text-stone-700">イベント説明*</label>
+            <button 
+                type="button" 
+                onClick={handleGenerateDescription} 
+                disabled={isGenerating}
+                className="text-xs flex items-center bg-indigo-50 text-indigo-700 px-2 py-1 rounded hover:bg-indigo-100 disabled:opacity-50"
+            >
+                <SparklesIcon className="w-3 h-3 mr-1" />
+                {isGenerating ? '生成中...' : 'AIで自動生成'}
+            </button>
+        </div>
+        <textarea value={description} onChange={(e) => setDescription(e.target.value)} required rows={5} className="mt-1 block w-full px-3 py-2 bg-white border border-stone-300 rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500" placeholder="イベントの魅力や詳細を入力してください。"/>
       </div>
+      
+      {eventType === EventType.MARCHE && (
+        <div className="flex items-center">
+            <input id="approval" type="checkbox" checked={isApprovalRequired} onChange={(e) => setIsApprovalRequired(e.target.checked)} className="h-4 w-4 text-teal-600 focus:ring-teal-500 border-stone-300 rounded"/>
+            <label htmlFor="approval" className="ml-2 block text-sm text-stone-900">出展者の承認制にする</label>
+        </div>
+      )}
+
       <div className="flex justify-end space-x-2 pt-4">
         <button type="button" onClick={onClose} className="bg-stone-200 text-stone-800 px-4 py-2 rounded-lg hover:bg-stone-300 transition-colors">キャンセル</button>
-        <button type="submit" className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">イベント作成</button>
+        <button type="submit" className="bg-teal-700 text-white px-4 py-2 rounded-lg hover:bg-teal-800 transition-colors">作成する</button>
       </div>
     </form>
     </div>
