@@ -9,13 +9,23 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@google/genai": "^1.28.0",
+    "@line/bot-sdk": "^10.5.0",
+    "@stripe/react-stripe-js": "^5.4.1",
+    "@stripe/stripe-js": "^8.6.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "mysql2": "^3.16.0",
+    "nodemailer": "^7.0.12",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "@google/genai": "^1.28.0"
+    "stripe": "^20.1.0"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
     "@vitejs/plugin-react": "^5.0.0",
+    "nodemon": "^3.1.11",
     "typescript": "~5.8.2",
     "vite": "^6.2.0"
   }

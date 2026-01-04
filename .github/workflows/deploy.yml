@@ -1,0 +1,87 @@
+name: Deploy to Server
+
+# プッシュ時に自動デプロイしたい場合は以下のコメントを外してください
+# on:
+#   push:
+#     branches:
+#       - main
+
+# 手動デプロイのみ有効
+on:
+  workflow_dispatch:
+    inputs:
+      deploy_message:
+        description: 'デプロイメッセージ（オプション）'
+        required: false
+        default: 'Manual deployment from GitHub Actions'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Add base path to vite config
+      run: |
+        if ! grep -q "base: '/iyasaka/'" vite.config.ts; then
+          sed -i "s/return {/return {\n      base: '\/iyasaka\/',/" vite.config.ts
+        fi
+    
+    - name: Build project
+      run: npm run build
+      env:
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+    
+    - name: Setup SSH
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        SSH_HOST: ${{ secrets.SSH_HOST }}
+        SSH_USER: ${{ secrets.SSH_USER }}
+      run: |
+        mkdir -p ~/.ssh
+        echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -H $SSH_HOST >> ~/.ssh/known_hosts
+    
+    - name: Deploy to server
+      env:
+        SSH_HOST: ${{ secrets.SSH_HOST }}
+        SSH_USER: ${{ secrets.SSH_USER }}
+      run: |
+        # ソースファイルを同期（distは除外）
+        rsync -avz --exclude='node_modules' \
+                   --exclude='dist' \
+                   --exclude='.git' \
+                   --exclude='.github' \
+                   --exclude='.env.local' \
+                   --exclude='*.log' \
+                   ./ $SSH_USER@$SSH_HOST:~/iyasaka/
+        
+        # サーバーでビルド実行
+        ssh $SSH_USER@$SSH_HOST "cd ~/iyasaka && npm install && npm run build"
+        
+        # パーミッション修正
+        ssh $SSH_USER@$SSH_HOST "chmod 755 ~/iyasaka && chmod -R 755 ~/iyasaka/dist"
+    
+    - name: Verify deployment
+      env:
+        SITE_URL: ${{ secrets.SITE_URL }}
+      run: |
+        HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" $SITE_URL)
+        if [ "$HTTP_STATUS" = "200" ]; then
+          echo "✅ Deployment successful! Site is responding with HTTP 200"
+        else
+          echo "⚠️ Site returned HTTP $HTTP_STATUS"
+          exit 1
+        fi

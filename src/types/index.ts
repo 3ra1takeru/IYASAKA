@@ -17,6 +17,7 @@ export interface User {
     favoriteProviderUpdates: boolean; // favoriteVendorUpdatesから変更
     serviceBookings: boolean;
   };
+  stripeAccountId?: string; // Stripe Connect Account ID
 }
 
 export interface Provider { // VendorからProviderにリネーム
@@ -50,6 +51,11 @@ export interface Event {
   eventType: EventType;
   vendorLimits?: number; // 追加: 出展者募集数
   attendeeLimits?: number; // 追加: 参加者定員
+
+  // New Fields for Admission Fee
+  isAdmissionFeeRequired?: boolean;
+  advanceTicketPrice?: number;
+  sameDayTicketPrice?: number;
 }
 
 export enum RegistrationStatus {
@@ -65,29 +71,29 @@ export enum OfferingType {
 }
 
 export interface Product {
-    id: string;
-    name: string;
-    description: string;
-    price: number;
-    imageUrl: string;
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  imageUrl: string;
 }
 
 export interface TimeSlot {
-    id: string;
-    startTime: string;
-    endTime: string;
+  id: string;
+  startTime: string;
+  endTime: string;
 }
 
 export interface EventRegistration {
-    id: string;
-    eventId: string;
-    providerId: string; // vendorIdからproviderIdに変更
-    status: RegistrationStatus;
-    offeringType: OfferingType;
-    products: Product[];
-    timeSlots: TimeSlot[];
-    notes?: string;
-    isOnlineBookingEnabled?: boolean;
+  id: string;
+  eventId: string;
+  providerId: string; // vendorIdからproviderIdに変更
+  status: RegistrationStatus;
+  offeringType: OfferingType;
+  products: Product[];
+  timeSlots: TimeSlot[];
+  notes?: string;
+  isOnlineBookingEnabled?: boolean;
 }
 
 export interface EventReservation {
@@ -96,12 +102,12 @@ export interface EventReservation {
 }
 
 export interface TimeSlotBooking {
-    id: string;
-    userId: string;
-    eventId: string;
-    providerId: string; // vendorIdからproviderIdに変更
-    timeSlotId: string;
-    bookingType: 'online' | '現地';
+  id: string;
+  userId: string;
+  eventId: string;
+  providerId: string; // vendorIdからproviderIdに変更
+  timeSlotId: string;
+  bookingType: 'online' | '現地';
 }
 
 export interface Review {
@@ -121,53 +127,53 @@ export interface Favorite {
 
 // 新しく追加
 export enum ServiceCategory {
-    FORTUNE = '占い',
-    DESIGN = 'デザイン',
-    CONSULTING = '悩み相談',
-    WRITING = 'ライティング',
-    OTHER = 'その他',
+  FORTUNE = '占い',
+  DESIGN = 'デザイン',
+  CONSULTING = '悩み相談',
+  WRITING = 'ライティング',
+  OTHER = 'その他',
 }
 
 export interface Service {
-    id: string;
-    providerId: string;
-    title: string;
-    description: string;
-    category: ServiceCategory;
-    price: number;
-    imageUrl: string;
-    deliveryMethod: 'online' | 'offline' | 'ondemand'; // both -> ondemand
-    location: string; // 都道府県
-    address?: string; // 詳細住所（対面の場合）
-    googleMapUrl?: string; // Google Map URL
-    meetingUrl?: string; // 会議URL（オンラインの場合）
-    status: 'open' | 'closed';
+  id: string;
+  providerId: string;
+  title: string;
+  description: string;
+  category: ServiceCategory;
+  price: number;
+  imageUrl: string;
+  deliveryMethod: 'online' | 'offline' | 'ondemand'; // both -> ondemand
+  location: string; // 都道府県
+  address?: string; // 詳細住所（対面の場合）
+  googleMapUrl?: string; // Google Map URL
+  meetingUrl?: string; // 会議URL（オンラインの場合）
+  status: 'open' | 'closed';
 }
 
 export interface ServiceOrder {
-    id: string;
-    serviceId: string;
-    buyerId: string;
-    providerId: string;
-    status: 'requested' | 'accepted' | 'completed' | 'cancelled';
-    createdAt: string;
+  id: string;
+  serviceId: string;
+  buyerId: string;
+  providerId: string;
+  status: 'requested' | 'accepted' | 'completed' | 'cancelled';
+  createdAt: string;
 }
 
 export interface ServiceReview {
-    id: string;
-    serviceId: string;
-    userId: string;
-    rating: number; // 1 to 5
-    comment: string;
-    createdAt: string; // YYYY-MM-DD
+  id: string;
+  serviceId: string;
+  userId: string;
+  rating: number; // 1 to 5
+  comment: string;
+  createdAt: string; // YYYY-MM-DD
 }
 
 export interface ChatMessage {
-    id: string;
-    orderId: string;
-    senderId: string; // Will be a userId
-    receiverId: string; // Will be a userId
-    message: string;
-    createdAt: string; // ISO string
-    isRead: boolean; // 追加
+  id: string;
+  orderId: string;
+  senderId: string; // Will be a userId
+  receiverId: string; // Will be a userId
+  message: string;
+  createdAt: string; // ISO string
+  isRead: boolean; // 追加
 }

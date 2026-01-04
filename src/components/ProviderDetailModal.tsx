@@ -23,16 +23,16 @@ interface ProviderDetailModalProps {
 }
 
 const StarRatingDisplay = ({ rating, className = "w-5 h-5" }: { rating: number, className?: string }) => (
-  <div className="flex items-center">
-    {[...Array(5)].map((_, i) => (
-      <StarIcon key={i} className={`${className} ${i < rating ? 'text-yellow-400' : 'text-stone-300'}`} filled={i < rating} />
-    ))}
-  </div>
+    <div className="flex items-center">
+        {[...Array(5)].map((_, i) => (
+            <StarIcon key={i} className={`${className} ${i < rating ? 'text-yellow-400' : 'text-stone-300'}`} filled={i < rating} />
+        ))}
+    </div>
 );
 
 const ProviderDetailModal: React.FC<ProviderDetailModalProps> = ({ isOpen, onClose, provider, registration, events, registrations, bookings, user, users, onBookTimeSlot, reviews, eventReservations, onAddReview, isFavorite, onToggleFavorite }) => {
-    
-    const isBookable = user?.role === UserRole.MEMBER;
+
+    const isBookable = user?.role === UserRole.MEMBER || user?.role === UserRole.PROVIDER;
     const providerUser = users.find(u => u.id === provider.id);
     const [selectedSlot, setSelectedSlot] = useState<any | null>(null);
 
@@ -42,19 +42,19 @@ const ProviderDetailModal: React.FC<ProviderDetailModalProps> = ({ isOpen, onClo
 
     const providerReviews = reviews.filter(r => r.providerId === provider.id).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     const averageRating = providerReviews.length > 0 ? providerReviews.reduce((sum, r) => sum + r.rating, 0) / providerReviews.length : 0;
-    
+
     const hasReservedEvent = user ? eventReservations.some(r => r.userId === user.id && r.eventId === registration.eventId) : false;
     const hasAlreadyReviewed = user ? providerReviews.some(r => r.userId === user.id && r.eventId === registration.eventId) : false;
     const canPostReview = user?.role === UserRole.MEMBER && hasReservedEvent && !hasAlreadyReviewed;
-    
+
     const otherEvents = registrations
-      .filter(r => 
-        r.providerId === provider.id && 
-        r.status === RegistrationStatus.APPROVED && 
-        r.eventId !== registration.eventId
-      )
-      .map(r => events.find(e => e.id === r.eventId))
-      .filter((e): e is Event => e !== undefined);
+        .filter(r =>
+            r.providerId === provider.id &&
+            r.status === RegistrationStatus.APPROVED &&
+            r.eventId !== registration.eventId
+        )
+        .map(r => events.find(e => e.id === r.eventId))
+        .filter((e): e is Event => e !== undefined);
 
 
     const handleSlotClick = (slot: any) => {
@@ -64,14 +64,14 @@ const ProviderDetailModal: React.FC<ProviderDetailModalProps> = ({ isOpen, onClo
             onBookTimeSlot(registration.eventId, provider.id, slot.id, '現地');
         }
     };
-    
+
     const confirmBooking = (bookingType: 'online' | '現地') => {
         if (selectedSlot) {
             onBookTimeSlot(registration.eventId, provider.id, selectedSlot.id, bookingType);
             setSelectedSlot(null);
         }
     };
-    
+
     const handleAddReview = () => {
         if (newRating > 0 && newComment.trim() && user) {
             onAddReview({
@@ -88,7 +88,7 @@ const ProviderDetailModal: React.FC<ProviderDetailModalProps> = ({ isOpen, onClo
 
     return (
         <Modal isOpen={isOpen} onClose={onClose} title="">
-             <div className="space-y-4 relative max-h-[70vh] overflow-y-auto pr-2">
+            <div className="space-y-4 relative max-h-[70vh] overflow-y-auto pr-2">
                 <div className="flex justify-between items-center -mt-2 mb-2">
                     <h2 className="text-2xl font-bold text-green-800">{provider.providerName}</h2>
                     {user?.role === UserRole.MEMBER && (
@@ -106,7 +106,7 @@ const ProviderDetailModal: React.FC<ProviderDetailModalProps> = ({ isOpen, onClo
                     {provider.profileImageUrl ? (
                         <img src={provider.profileImageUrl} alt={provider.providerName} className="w-16 h-16 rounded-full object-cover border-2 border-stone-200" />
                     ) : (
-                        <StoreIcon className="w-10 h-10 text-stone-400 mt-1"/>
+                        <StoreIcon className="w-10 h-10 text-stone-400 mt-1" />
                     )}
                     <div>
                         <h3 className="font-bold text-lg text-stone-800">{provider.name}</h3>
@@ -128,7 +128,7 @@ const ProviderDetailModal: React.FC<ProviderDetailModalProps> = ({ isOpen, onClo
                                 <div className="space-y-3">
                                     {registration.products.map(product => (
                                         <div key={product.id} className="flex items-center space-x-4">
-                                            <img src={product.imageUrl} alt={product.name} className="w-16 h-16 rounded-md object-cover"/>
+                                            <img src={product.imageUrl} alt={product.name} className="w-16 h-16 rounded-md object-cover" />
                                             <div>
                                                 <p className="font-semibold">{product.name} - &yen;{product.price}</p>
                                                 <p className="text-sm text-stone-600">{product.description}</p>
@@ -153,7 +153,7 @@ const ProviderDetailModal: React.FC<ProviderDetailModalProps> = ({ isOpen, onClo
                                     const isBooked = bookings.some(b => b.timeSlotId === slot.id);
                                     const myBooking = bookings.find(b => b.timeSlotId === slot.id && b.userId === user?.id);
                                     return (
-                                        <button 
+                                        <button
                                             key={slot.id}
                                             disabled={!isBookable || (isBooked && !myBooking)}
                                             onClick={() => handleSlotClick(slot)}
@@ -210,21 +210,21 @@ const ProviderDetailModal: React.FC<ProviderDetailModalProps> = ({ isOpen, onClo
                             {providerReviews.map(review => {
                                 const reviewer = users.find(u => u.id === review.userId);
                                 return (
-                                <div key={review.id} className="bg-stone-50 p-3 rounded-md">
-                                    <div className="flex items-center justify-between mb-1">
-                                        <div className="flex items-center gap-2">
-                                            {reviewer?.profileImageUrl ? (
-                                                <img src={reviewer.profileImageUrl} alt={reviewer.name} className="w-6 h-6 rounded-full object-cover" />
-                                            ) : (
-                                                <UserCircleIcon className="w-5 h-5 text-stone-400"/>
-                                            )}
-                                            <p className="font-semibold text-sm text-stone-700">{reviewer?.name || '匿名ユーザー'}</p>
+                                    <div key={review.id} className="bg-stone-50 p-3 rounded-md">
+                                        <div className="flex items-center justify-between mb-1">
+                                            <div className="flex items-center gap-2">
+                                                {reviewer?.profileImageUrl ? (
+                                                    <img src={reviewer.profileImageUrl} alt={reviewer.name} className="w-6 h-6 rounded-full object-cover" />
+                                                ) : (
+                                                    <UserCircleIcon className="w-5 h-5 text-stone-400" />
+                                                )}
+                                                <p className="font-semibold text-sm text-stone-700">{reviewer?.name || '匿名ユーザー'}</p>
+                                            </div>
+                                            <StarRatingDisplay rating={review.rating} className="w-4 h-4" />
                                         </div>
-                                        <StarRatingDisplay rating={review.rating} className="w-4 h-4"/>
+                                        <p className="text-stone-600 text-sm">{review.comment}</p>
+                                        <p className="text-right text-xs text-stone-400 mt-1">{review.createdAt}</p>
                                     </div>
-                                    <p className="text-stone-600 text-sm">{review.comment}</p>
-                                    <p className="text-right text-xs text-stone-400 mt-1">{review.createdAt}</p>
-                                </div>
                                 )
                             })}
                         </div>
@@ -232,31 +232,31 @@ const ProviderDetailModal: React.FC<ProviderDetailModalProps> = ({ isOpen, onClo
                         <p className="text-sm text-stone-500">まだ口コミはありません。</p>
                     )}
                 </div>
-                
+
                 {/* Review Form Section */}
                 {canPostReview && (
                     <div className="pt-4 border-t">
-                         <h4 className="font-semibold text-stone-800 mb-2">この出展者の口コミを投稿する</h4>
-                         <div className="space-y-3">
+                        <h4 className="font-semibold text-stone-800 mb-2">この出展者の口コミを投稿する</h4>
+                        <div className="space-y-3">
                             <div>
                                 <label className="text-sm font-medium text-stone-600">評価</label>
                                 <div className="flex items-center mt-1">
                                     {[...Array(5)].map((_, i) => (
-                                    <button key={i} onClick={() => setNewRating(i + 1)} onMouseOver={() => setHoverRating(i+1)} onMouseOut={() => setHoverRating(0)}>
-                                        <StarIcon 
-                                            className={`w-7 h-7 cursor-pointer transition-colors ${(hoverRating || newRating) > i ? 'text-yellow-400' : 'text-stone-300'}`} 
-                                            filled={(hoverRating || newRating) > i}
-                                        />
-                                    </button>
+                                        <button key={i} onClick={() => setNewRating(i + 1)} onMouseOver={() => setHoverRating(i + 1)} onMouseOut={() => setHoverRating(0)}>
+                                            <StarIcon
+                                                className={`w-7 h-7 cursor-pointer transition-colors ${(hoverRating || newRating) > i ? 'text-yellow-400' : 'text-stone-300'}`}
+                                                filled={(hoverRating || newRating) > i}
+                                            />
+                                        </button>
                                     ))}
                                 </div>
                             </div>
-                             <div>
+                            <div>
                                 <label className="text-sm font-medium text-stone-600">コメント</label>
-                                <textarea 
-                                    value={newComment} 
-                                    onChange={e => setNewComment(e.target.value)} 
-                                    rows={3} 
+                                <textarea
+                                    value={newComment}
+                                    onChange={e => setNewComment(e.target.value)}
+                                    rows={3}
                                     placeholder="サービスや商品の感想を教えてください"
                                     className="mt-1 block w-full px-3 py-2 bg-white border border-stone-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
                                 />
@@ -264,7 +264,7 @@ const ProviderDetailModal: React.FC<ProviderDetailModalProps> = ({ isOpen, onClo
                             <div className="text-right">
                                 <button onClick={handleAddReview} disabled={!newRating || !newComment.trim()} className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 disabled:bg-stone-300">投稿する</button>
                             </div>
-                         </div>
+                        </div>
                     </div>
                 )}
 

@@ -1,0 +1,21 @@
+{
+  "server": {
+    "host": "sakura-vps",
+    "hostname": "os3-318-48990.vs.sakura.ne.jp",
+    "user": "ubuntu",
+    "remotePath": "~/iyasaka",
+    "distPath": "~/iyasaka/dist"
+  },
+  "build": {
+    "localCommand": "npm run build",
+    "remoteCommand": "cd ~/iyasaka && npm install && npm run build"
+  },
+  "nginx": {
+    "configPath": "/etc/nginx/sites-available/marche",
+    "webPath": "/iyasaka/",
+    "serveFrom": "/home/ubuntu/iyasaka/dist/"
+  },
+  "url": {
+    "production": "https://os3-318-48990.vs.sakura.ne.jp/iyasaka/"
+  }
+}
